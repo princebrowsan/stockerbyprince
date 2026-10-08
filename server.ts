@@ -1,10 +1,9 @@
 import express from 'express';
 import path from 'path';
-import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
 
@@ -180,11 +179,11 @@ app.get('/api/indices', async (_req, res) => {
 });
 
 async function startServer() {
-  if (process.env.NODE_ENV === 'production') {
-    const distPath = path.resolve(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+  const isProd = process.env.NODE_ENV === 'production';
+  if (isProd) {
+    app.use(express.static('dist'));
     app.get('*', (_req, res) => {
-      res.sendFile(path.resolve(distPath, 'index.html'));
+      res.sendFile(path.resolve(process.cwd(), 'dist', 'index.html'));
     });
   } else {
     // Mount Vite development middlewares
