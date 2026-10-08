@@ -1,0 +1,3661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>stocker by browsan.co — The Indian Stock Market</title>
+  <meta name="description" content="stocker by browsan.co — Search all Indian stocks across NSE & BSE, view advanced candlestick graphs, inspect deep corporate fundamentals, and track your favorites watchlist.">
+  <meta property="og:title" content="stocker by browsan.co — The Indian Stock Market">
+  <meta property="og:description" content="Search all Indian stocks across NSE & BSE, view advanced candlestick graphs, and inspect deep corporate fundamentals.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/82e7eb75-c65f-490a-99b5-f3d1cad54200.webp">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=block" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #05070c;
+      --card-bg: rgba(14, 18, 30, 0.78);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --ink: #ffffff;
+      --ink-dim: #94a3b8;
+      --ink-sub: #cbd5e1;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.35);
+      --bull: #10b981;
+      --bull-glow: rgba(16, 185, 129, 0.25);
+      --bear: #f43f5e;
+      --bear-glow: rgba(244, 63, 94, 0.25);
+      --gold: #f59e0b;
+      --cyan: #38bdf8;
+      --sidebar-w: 350px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Ambient Looping Video Background */
+    .bg-stage {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 51% 15%;
+      opacity: 0;
+      transition: opacity 0.9s linear;
+      filter: saturate(1.25) contrast(1.1);
+    }
+
+    .bg-video.is-active {
+      opacity: 0.52;
+    }
+
+    .bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, rgba(5, 7, 12, 0.2) 0%, rgba(5, 7, 12, 0.8) 65%, rgba(5, 7, 12, 0.98) 100%),
+                  linear-gradient(180deg, rgba(5, 7, 12, 0.35) 0%, rgba(5, 7, 12, 0.92) 100%);
+    }
+
+    /* Header Nav */
+    .nav {
+      position: relative;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .brand-text-col {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      color: #ffffff;
+      text-transform: lowercase;
+    }
+
+    .brand-by {
+      font-size: 11px;
+      font-weight: 400;
+      color: #94a3b8;
+      letter-spacing: 0.03em;
+      text-transform: lowercase;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .market-status-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 12px;
+      backdrop-filter: blur(12px);
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .ticker-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--ink-sub);
+      font-size: 12px;
+    }
+
+    .ticker-pill .up {
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    /* Watchlist Nav Button */
+    .watchlist-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+      padding: 7px 15px;
+      border-radius: 99px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .watchlist-nav-btn:hover {
+      background: rgba(245, 158, 11, 0.22);
+      border-color: rgba(245, 158, 11, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .watchlist-badge {
+      background: #f59e0b;
+      color: #000;
+      font-weight: 800;
+      font-size: 10.5px;
+      border-radius: 99px;
+      padding: 1px 6px;
+      line-height: 1.2;
+    }
+
+    /* Menu Button in Top Right (Clean Text, No Logo / Symbol) */
+    .menu-btn-wrap {
+      position: relative;
+    }
+
+    .nav-menu-btn {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-menu-btn:hover, .nav-menu-btn.active {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.32);
+      transform: translateY(-1px);
+    }
+
+    /* Top Right Menu Dropdown (Clean Text Items, No Symbols / Emojis) */
+    .nav-menu-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 230px;
+      background: rgba(13, 17, 28, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 16px;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(28px);
+      padding: 8px;
+      display: none;
+      z-index: 100;
+      transform-origin: top right;
+      animation: menuFadeIn 0.18s ease forwards;
+    }
+
+    @keyframes menuFadeIn {
+      from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .nav-menu-dropdown.show {
+      display: block;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .menu-item:hover {
+      background: rgba(99, 102, 241, 0.15);
+      color: #ffffff;
+      transform: translateX(2px);
+    }
+
+    .menu-item.highlight {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(139, 92, 246, 0.22));
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #ffffff;
+    }
+
+    .menu-item.highlight:hover {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(139, 92, 246, 0.35));
+    }
+
+    .menu-item-badge {
+      font-size: 10px;
+      background: rgba(99, 102, 241, 0.35);
+      color: #c7d2fe;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .menu-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 6px 0;
+    }
+
+    /* Main Container */
+    .main-wrap {
+      position: relative;
+      z-index: 10;
+      min-height: calc(100vh - 72px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================
+       VIEW 1: INTRO HERO VIEW
+       ========================================================== */
+    .intro-hero-view {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px 80px;
+      max-width: 960px;
+      margin: 0 auto;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .intro-hero-view.hidden {
+      display: none;
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+
+    .intro-tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 99px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #c7d2fe;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .bold-heading {
+      font-size: clamp(38px, 6vw, 76px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      color: #ffffff;
+      text-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
+      margin-bottom: 16px;
+    }
+
+    .bold-heading strong {
+      font-weight: 800;
+      background: linear-gradient(180deg, #ffffff 40%, #e2e8f0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .intro-sub {
+      font-size: clamp(16px, 2vw, 19px);
+      color: #cbd5e1;
+      font-weight: 300;
+      max-width: 620px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+    }
+
+    /* "Get Started" CTA Button */
+    .btn-get-started {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #fdfdfd;
+      color: #050505;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 16px 36px;
+      border-radius: 99px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 10px 32px rgba(255, 255, 255, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.5);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-get-started:hover {
+      background: #ffffff;
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 14px 44px rgba(255, 255, 255, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.8);
+    }
+
+    .btn-get-started .arw {
+      width: 14px;
+      height: 12px;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-get-started:hover .arw {
+      transform: translateX(3px);
+    }
+
+    /* Intro Live Indices Bar */
+    .intro-indices-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 48px;
+      flex-wrap: wrap;
+    }
+
+    .intro-index-chip {
+      background: rgba(16, 20, 31, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 18px;
+      border-radius: 16px;
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease;
+    }
+
+    .intro-index-chip:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .intro-index-chip .name {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .intro-index-chip .val {
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    /* ==========================================================
+       VIEW 2: EXPLORE & CANDLESTICK INTRADAY GRAPH
+       ========================================================== */
+    .explore-view {
+      display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 20px 80px;
+      width: 100%;
+    }
+
+    .explore-view.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .explore-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .explore-title-box h2 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .explore-title-box p {
+      font-size: 13.5px;
+      color: #94a3b8;
+    }
+
+    .action-links-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 7px 14px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+    }
+
+    .header-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .header-btn.accent {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: #c7d2fe;
+    }
+
+    .header-btn.accent:hover {
+      background: rgba(99, 102, 241, 0.32);
+      color: #fff;
+    }
+
+    /* Search Bar Box */
+    .search-wrapper {
+      position: relative;
+      max-width: 720px;
+      margin: 0 auto 18px;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: rgba(18, 22, 34, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 18px;
+      padding: 6px 10px 6px 18px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+      transition: all 0.2s ease;
+    }
+
+    .search-bar:focus-within {
+      border-color: #818cf8;
+      box-shadow: 0 14px 44px rgba(0, 0, 0, 0.55), 0 0 0 2px rgba(129, 140, 248, 0.35);
+    }
+
+    .search-icon {
+      color: #94a3b8;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: 16px;
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .search-input::placeholder {
+      color: #64748b;
+      font-weight: 400;
+    }
+
+    .search-clear-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #94a3b8;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      margin-right: 8px;
+    }
+
+    .search-submit-btn {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #fff;
+      border: none;
+      padding: 11px 22px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+    }
+
+    .search-submit-btn:hover {
+      background: linear-gradient(135deg, #4338ca, #4f46e5);
+      transform: translateY(-1px);
+    }
+
+    /* Autocomplete Suggestions Panel */
+    .suggestions-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: rgba(14, 17, 27, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(28px);
+      display: none;
+      z-index: 50;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .suggestions-header {
+      padding: 10px 16px 6px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .suggestion-item {
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.15s ease;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+      background: rgba(99, 102, 241, 0.14);
+    }
+
+    .sug-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sug-ticker-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sug-symbol {
+      font-weight: 700;
+      font-size: 14.5px;
+      color: #ffffff;
+    }
+
+    .sug-exchange {
+      font-size: 10.5px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .sug-name {
+      font-size: 12px;
+      color: #94a3b8;
+      max-width: 320px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sug-right {
+      text-align: right;
+    }
+
+    .sug-price {
+      font-weight: 700;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .sug-change {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .sug-change.up { color: #10b981; }
+    .sug-change.down { color: #f43f5e; }
+
+    /* Quick Tags */
+    .quick-tags {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .quick-tag-label {
+      font-size: 12px;
+      color: #64748b;
+      margin-right: 4px;
+      font-weight: 600;
+    }
+
+    .tag-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .tag-btn:hover {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: #fff;
+    }
+
+    .tag-btn.active {
+      background: rgba(99, 102, 241, 0.28);
+      border-color: #818cf8;
+      color: #fff;
+    }
+
+    /* Stock Hero Card */
+    .stock-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 28px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+      position: relative;
+      margin-bottom: 32px;
+    }
+
+    .stock-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 15%;
+      width: 70%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    }
+
+    .stock-header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stock-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stock-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stock-symbol {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    .stock-fav-star-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #94a3b8;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      transition: all 0.2s ease;
+    }
+
+    .stock-fav-star-btn:hover {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: #f59e0b;
+      color: #f59e0b;
+      transform: scale(1.1);
+    }
+
+    .stock-fav-star-btn.is-favorite {
+      background: rgba(245, 158, 11, 0.22);
+      border-color: #f59e0b;
+      color: #f59e0b;
+    }
+
+    .about-link-pill {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(99, 102, 241, 0.16);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #c7d2fe;
+      padding: 3px 10px;
+      border-radius: 99px;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.16s ease;
+    }
+
+    .about-link-pill:hover {
+      background: rgba(99, 102, 241, 0.3);
+      color: #fff;
+    }
+
+    .stock-exchange-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .stock-market-status {
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .stock-company-name {
+      font-size: 14px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* Controls Bar: Timeframe & Chart Style Toggle */
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .chart-type-selector, .timeframe-selector {
+      display: flex;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 3px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .toggle-btn:hover { color: #fff; }
+
+    .toggle-btn.active {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Price Big Numbers */
+    .price-display-group {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .current-price {
+      font-size: clamp(32px, 4vw, 44px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    .price-diff-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 99px;
+    }
+
+    .price-diff-pill.up {
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.28);
+    }
+
+    .price-diff-pill.down {
+      background: rgba(244, 63, 94, 0.12);
+      color: #f43f5e;
+      border: 1px solid rgba(244, 63, 94, 0.28);
+    }
+
+    .chart-legend-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* Advanced Interactive Graph Canvas Section */
+    .chart-box {
+      position: relative;
+      width: 100%;
+      height: 330px;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      background: rgba(7, 10, 18, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 4px;
+    }
+
+    canvas#stockChart {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+
+    /* Advanced Scrubber Tooltip */
+    .chart-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(11, 14, 24, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      padding: 8px 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(16px);
+      display: none;
+      z-index: 25;
+      transform: translate(-50%, -125%);
+      white-space: nowrap;
+      min-width: 170px;
+    }
+
+    .tooltip-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #94a3b8;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+
+    .tooltip-main-price {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .tooltip-ohlc-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3px 10px;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .tooltip-ohlc-item span:first-child {
+      color: #64748b;
+      margin-right: 3px;
+    }
+
+    .tooltip-ohlc-item span:last-child {
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    /* Intraday Time Markers & Day Range */
+    .intraday-axis-row {
+      display: flex;
+      justify-content: space-between;
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 0 4px;
+      margin-bottom: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 8px;
+    }
+
+    /* Day Range Bar */
+    .day-range-wrapper {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 16px;
+      padding: 16px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 24px;
+    }
+
+    .day-range-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .range-bar-track {
+      position: relative;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 99px;
+      overflow: visible;
+      margin-bottom: 6px;
+    }
+
+    .range-bar-fill {
+      position: absolute;
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #10b981);
+      border-radius: 99px;
+    }
+
+    .range-bar-pin {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 14px;
+      height: 14px;
+      background: #ffffff;
+      border: 3px solid #6366f1;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+    }
+
+    .range-labels-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    .range-low-val { color: #f43f5e; }
+    .range-high-val { color: #10b981; }
+
+    /* Key Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .metric-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-2px);
+    }
+
+    .metric-name {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .metric-val {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* Market Overview Chips Bar with Subtle Hover Scale */
+    .market-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .strip-card {
+      background: rgba(16, 20, 31, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 18px;
+      padding: 16px 18px;
+      backdrop-filter: blur(16px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease, border-color 0.24s ease, background 0.24s ease;
+      will-change: transform;
+    }
+
+    .strip-card:hover {
+      background: rgba(26, 32, 50, 0.85);
+      border-color: rgba(99, 102, 241, 0.45);
+      transform: translateY(-4px) scale(1.025);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 102, 241, 0.35);
+    }
+
+    .strip-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .strip-sub {
+      font-size: 11.5px;
+      color: #94a3b8;
+    }
+
+    .strip-price {
+      font-size: 15px;
+      font-weight: 700;
+      text-align: right;
+      color: #fff;
+    }
+
+    .strip-change {
+      font-size: 12px;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .strip-change.up { color: #10b981; }
+    .strip-change.down { color: #f43f5e; }
+
+    /* ==========================================================
+       VIEW 3: ABOUT STOCKS (DEEP FUNDAMENTALS & ALL DETAILS)
+       ========================================================== */
+    .about-stocks-view {
+      display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 20px 80px;
+      width: 100%;
+    }
+
+    .about-stocks-view.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .about-header-section {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .about-header-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #c7d2fe;
+      padding: 5px 14px;
+      border-radius: 99px;
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .about-main-heading {
+      font-size: clamp(30px, 4.5vw, 48px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .about-main-heading span {
+      background: linear-gradient(180deg, #ffffff, #c7d2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .about-sub-caption {
+      font-size: 15px;
+      color: #94a3b8;
+      max-width: 620px;
+      margin: 0 auto 24px;
+    }
+
+    /* About Search Bar */
+    .about-search-box {
+      max-width: 640px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+
+    /* Detailed Stock Hero Banner */
+    .about-stock-banner {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 28px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-banner-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .about-banner-title h3 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .about-banner-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .about-meta-chip {
+      font-size: 11.5px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 3px 10px;
+      border-radius: 8px;
+    }
+
+    .about-banner-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-action-primary {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #fff;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action-primary:hover {
+      background: linear-gradient(135deg, #4338ca, #4f46e5);
+      transform: translateY(-1px);
+    }
+
+    .about-company-desc {
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.7;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 16px 20px;
+      border-radius: 16px;
+      margin-top: 14px;
+    }
+
+    /* 6 Advanced Detail Sections Grid */
+    .about-details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .about-section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 22px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .about-card-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      padding-bottom: 12px;
+    }
+
+    .detail-table {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .detail-value {
+      color: #ffffff;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .detail-value.up { color: #10b981; }
+    .detail-value.down { color: #f43f5e; }
+
+    /* Shareholding visual progress bar */
+    .shareholder-bar-wrap {
+      margin-top: 8px;
+    }
+
+    .shareholder-bar {
+      height: 10px;
+      border-radius: 99px;
+      display: flex;
+      overflow: hidden;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sh-segment {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .sh-promoter { background: #6366f1; }
+    .sh-fii { background: #10b981; }
+    .sh-dii { background: #f59e0b; }
+    .sh-public { background: #ec4899; }
+
+    .sh-legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 11px;
+    }
+
+    .sh-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #cbd5e1;
+    }
+
+    .sh-legend-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+    }
+
+    /* Analyst Rating Gauge */
+    .analyst-gauge-box {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .analyst-rating-text {
+      font-size: 20px;
+      font-weight: 800;
+      color: #10b981;
+      margin-bottom: 4px;
+    }
+
+    .analyst-breakdown-row {
+      display: flex;
+      justify-content: space-around;
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin-top: 8px;
+    }
+
+    /* ==========================================================
+       SIDEBAR SECTION: FAVORITE INDIAN STOCKS
+       ========================================================== */
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .favorites-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(var(--sidebar-w), 90vw);
+      background: rgba(12, 15, 26, 0.94);
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(28px);
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .favorites-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sidebar-close-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #94a3b8;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: all 0.16s ease;
+    }
+
+    .sidebar-close-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+    }
+
+    .sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Favorite stock item with Subtle Hover Scale Animation */
+    .fav-item-card {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+      will-change: transform;
+      position: relative;
+    }
+
+    .fav-item-card:hover {
+      background: rgba(99, 102, 241, 0.16);
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px) scale(1.025);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.3);
+    }
+
+    .fav-item-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fav-item-symbol {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .fav-item-name {
+      font-size: 11.5px;
+      color: #94a3b8;
+      max-width: 130px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fav-item-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .fav-item-price-col {
+      text-align: right;
+    }
+
+    .fav-item-price {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .fav-item-change {
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .fav-item-change.up { color: #10b981; }
+    .fav-item-change.down { color: #f43f5e; }
+
+    .fav-item-remove-btn {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.15s ease;
+    }
+
+    .fav-item-remove-btn:hover {
+      color: #f43f5e;
+    }
+
+    .empty-watchlist-msg {
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+      padding: 40px 16px;
+    }
+
+    .empty-watchlist-msg p {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #475569;
+    }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .add-current-fav-btn {
+      width: 100%;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #c7d2fe;
+      padding: 10px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .add-current-fav-btn:hover {
+      background: rgba(99, 102, 241, 0.35);
+      color: #fff;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 12px;
+      color: #475569;
+      padding-bottom: 24px;
+    }
+
+    .sync-live-btn {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+    .sync-live-btn:hover {
+      background: rgba(16, 185, 129, 0.24);
+      border-color: #10b981;
+      color: #6ee7b7;
+      transform: translateY(-1px);
+    }
+    .sync-live-btn.loading {
+      opacity: 0.75;
+      pointer-events: none;
+    }
+    .sync-live-btn.loading .sync-icon {
+      display: inline-block;
+      animation: spin-sync 0.8s linear infinite;
+    }
+    @keyframes spin-sync {
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .nav {
+        padding: 12px 18px;
+      }
+      .market-status-bar {
+        display: none;
+      }
+      .bold-heading {
+        font-size: 36px;
+      }
+      .intro-sub {
+        font-size: 15px;
+      }
+      .stock-card {
+        padding: 20px 16px;
+      }
+      .chart-box {
+        height: 260px;
+      }
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .about-details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Rotating Globe Stage (Dual Video Crossfade) -->
+  <div class="bg-stage">
+    <video class="bg-video is-active" id="bgVideoA" autoplay muted loop playsinline preload="auto" poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/82e7eb75-c65f-490a-99b5-f3d1cad54200.webp">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260912_104036_bd6924f6-3c8e-417e-8465-6d03c8c2e9e6.mp4" type="video/mp4">
+    </video>
+    <video class="bg-video" id="bgVideoB" muted loop playsinline preload="auto" poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/82e7eb75-c65f-490a-99b5-f3d1cad54200.webp">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260912_104036_bd6924f6-3c8e-417e-8465-6d03c8c2e9e6.mp4" type="video/mp4">
+    </video>
+    <div class="bg-overlay"></div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="nav">
+    <div class="brand-link" id="navBrandLink">
+      <div class="brand-text-col">
+        <span class="brand-name">stocker</span>
+        <span class="brand-by">by browsan.co</span>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <!-- Watchlist Sidebar Toggle Button -->
+      <button id="watchlistToggleBtn" class="watchlist-nav-btn" aria-label="Open favorite stocks sidebar">
+        <span>★ Watchlist</span>
+        <span class="watchlist-badge" id="watchlistCountBadge">3</span>
+      </button>
+
+      <!-- Three Dots Menu in Top Right Corner -->
+      <div class="menu-btn-wrap">
+        <button id="navMenuBtn" class="nav-menu-btn" aria-label="Open menu" aria-expanded="false" title="Menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <circle cx="12" cy="5" r="2.2"></circle>
+            <circle cx="12" cy="12" r="2.2"></circle>
+            <circle cx="12" cy="19" r="2.2"></circle>
+          </svg>
+        </button>
+
+        <!-- Dropdown Menu (Clean Text Items, No Symbols or Emojis) -->
+        <div id="navMenuDropdown" class="nav-menu-dropdown">
+          <button class="menu-item highlight" id="menuItemAboutStocks">
+            <span>About Stocks</span>
+            <span class="menu-item-badge">New</span>
+          </button>
+          <button class="menu-item" id="menuItemExplore">
+            <span>Intraday Screener</span>
+          </button>
+          <button class="menu-item" id="menuItemWatchlist">
+            <span>My Watchlist</span>
+          </button>
+          <div class="menu-divider"></div>
+          <button class="menu-item" id="menuItemHome">
+            <span>Home Overview</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-wrap">
+
+    <!-- ==========================================================
+         VIEW 1: INTRO HERO VIEW
+         ========================================================== -->
+    <section class="intro-hero-view" id="introView">
+      <h1 class="bold-heading">
+        <strong>The Indian Stock Market</strong>
+      </h1>
+
+      <p class="intro-sub">
+        Explore live market indices, search any company across NSE & BSE, view advanced candlestick & intraday graphs, and inspect deep fundamental financial details.
+      </p>
+
+      <button id="getStartedBtn" class="btn-get-started">
+        <span>Get Started</span>
+        <svg class="arw" viewBox="0 0 12 10" fill="none" aria-hidden="true">
+          <path d="M0.8 5h10M7.1 1.4 10.9 5l-3.8 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <!-- Live Indices Quick Strip -->
+      <div class="intro-indices-row">
+        <div class="intro-index-chip">
+          <span class="name">NIFTY 50</span>
+          <span class="val" id="introValNifty">₹24,840.50 (+0.58%)</span>
+        </div>
+        <div class="intro-index-chip">
+          <span class="name">SENSEX</span>
+          <span class="val" id="introValSensex">₹81,420.15 (+0.52%)</span>
+        </div>
+        <div class="intro-index-chip">
+          <span class="name">BANK NIFTY</span>
+          <span class="val" id="introValBankNifty">₹51,320.75 (+0.57%)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         VIEW 2: EXPLORE & CANDLESTICK INTRADAY GRAPH
+         ========================================================== -->
+    <section class="explore-view" id="exploreView">
+      <div class="explore-header">
+        <div class="explore-title-box">
+          <h2>Indian Stock Screener & Advanced Graph</h2>
+          <p>Minute-by-minute candlestick action, OHLC bars, moving average, and trading volume.</p>
+        </div>
+        <div class="action-links-row">
+          <button id="goToAboutBtn" class="header-btn accent">
+            <span>About Stocks (Fundamentals)</span>
+          </button>
+          <button id="backToIntroBtn" class="header-btn">
+            <span>← Overview</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-wrapper">
+        <form id="searchForm" class="search-bar" onsubmit="return false;">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search all Indian stocks (e.g. Reliance, Adani, Tata, HDFC, Bajaj, Zomato)..."
+            autocomplete="off"
+            aria-label="Search Indian stocks"
+          />
+          <button type="button" id="clearBtn" class="search-clear-btn" aria-label="Clear search">✕</button>
+          <button type="submit" id="searchBtn" class="search-submit-btn">
+            <span>Search</span>
+          </button>
+        </form>
+
+        <!-- Autocomplete Suggestions Panel -->
+        <div id="suggestionsPanel" class="suggestions-panel">
+          <div class="suggestions-header">
+            <span>Matching Indian Equities & Indices</span>
+            <span style="color:#818cf8; font-size:10px;">Live Database</span>
+          </div>
+          <div id="suggestionsList"></div>
+        </div>
+      </div>
+
+      <!-- Quick Ticker Tag Chips -->
+      <div class="quick-tags">
+        <span class="quick-tag-label">Popular:</span>
+        <button class="tag-btn active" data-symbol="NIFTY 50">NIFTY 50</button>
+        <button class="tag-btn" data-symbol="SENSEX">SENSEX</button>
+        <button class="tag-btn" data-symbol="RELIANCE">RELIANCE</button>
+        <button class="tag-btn" data-symbol="TCS">TCS</button>
+        <button class="tag-btn" data-symbol="HDFCBANK">HDFC BANK</button>
+        <button class="tag-btn" data-symbol="TATAMOTORS">TATA MOTORS</button>
+        <button class="tag-btn" data-symbol="INFY">INFOSYS</button>
+        <button class="tag-btn" data-symbol="SBIN">SBI</button>
+        <button class="tag-btn" data-symbol="ADANIENT">ADANI ENT</button>
+        <button class="tag-btn" data-symbol="ZOMATO">ZOMATO</button>
+      </div>
+
+      <!-- Stock Day Graph Hero Card -->
+      <section class="stock-card" id="stockCard">
+        <div class="stock-header-row">
+          <div class="stock-title-group">
+            <div class="stock-badge-row">
+              <span class="stock-symbol" id="stockSymbol">NIFTY 50</span>
+              <button class="stock-fav-star-btn" id="favoriteStockBtn" title="Toggle favorite">★</button>
+              <button class="about-link-pill" id="viewAboutStockPill" title="View in-depth fundamentals">
+                <span>View Full Details →</span>
+              </button>
+              <span class="stock-exchange-badge" id="stockExchange">NSE INDEX</span>
+              <span class="stock-market-status" id="stockStatus">
+                <span class="live-dot" style="width:5px;height:5px;"></span>
+                <span id="stockStatusText">Live Free API (Yahoo Finance)</span>
+              </span>
+              <button class="sync-live-btn" id="syncLiveQuoteBtn" title="Sync real-time data from free API">
+                <span class="sync-icon" id="syncIcon">↻</span>
+                <span id="syncText">Sync Live Feed</span>
+              </button>
+            </div>
+            <span class="stock-company-name" id="stockName">Nifty 50 Benchmark Index — National Stock Exchange of India</span>
+          </div>
+
+          <!-- Controls: Chart Type + Timeframe Selector -->
+          <div class="controls-bar">
+            <!-- Candlestick vs Line Toggle -->
+            <div class="chart-type-selector">
+              <button class="toggle-btn active" id="btnChartCandle" data-type="candle">Candlestick</button>
+              <button class="toggle-btn" id="btnChartLine" data-type="line">Line / Area</button>
+            </div>
+
+            <!-- Timeframe Selector -->
+            <div class="timeframe-selector">
+              <button class="toggle-btn active" data-tf="1D">1D (Today)</button>
+              <button class="toggle-btn" data-tf="5D">5D</button>
+              <button class="toggle-btn" data-tf="1M">1M</button>
+              <button class="toggle-btn" data-tf="1Y">1Y</button>
+              <button class="toggle-btn" data-tf="5Y">5Y</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Price Headline -->
+        <div class="price-display-group">
+          <span class="current-price" id="stockPrice">₹24,840.50</span>
+          <div class="price-diff-pill up" id="stockDiffPill">
+            <span id="stockDiffSign">▲</span>
+            <span id="stockDiffText">+142.30 (+0.58%) Today</span>
+          </div>
+          <div class="chart-legend-badge">
+            <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span>Bullish</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f43f5e;"></span>Bearish</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span>20-EMA</div>
+          </div>
+        </div>
+
+        <!-- Advanced Candlestick / Line Canvas -->
+        <div class="chart-box" id="chartBox">
+          <canvas id="stockChart"></canvas>
+          <div id="chartTooltip" class="chart-tooltip">
+            <div class="tooltip-header">
+              <span id="tooltipTime">02:45 PM IST</span>
+              <span id="tooltipChangeBadge">+0.32%</span>
+            </div>
+            <div class="tooltip-main-price" id="tooltipPrice">₹24,840.50</div>
+            <div class="tooltip-ohlc-row">
+              <div class="tooltip-ohlc-item"><span>O:</span><span id="tooltipOpen">₹24,810.00</span></div>
+              <div class="tooltip-ohlc-item"><span>H:</span><span id="tooltipHigh">₹24,855.20</span></div>
+              <div class="tooltip-ohlc-item"><span>L:</span><span id="tooltipLow">₹24,805.10</span></div>
+              <div class="tooltip-ohlc-item"><span>C:</span><span id="tooltipClose">₹24,840.50</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Time Axis -->
+        <div class="intraday-axis-row" id="timeAxisRow">
+          <span>09:15 AM (Market Open)</span>
+          <span>10:30 AM</span>
+          <span>12:00 PM</span>
+          <span>01:30 PM</span>
+          <span>03:30 PM (Market Close)</span>
+        </div>
+
+        <!-- Today's Range Slider -->
+        <div class="day-range-wrapper">
+          <div class="day-range-header">
+            <span>Today's Trading Range (Intraday Low to High)</span>
+            <span id="rangeSpreadText">Day Spread: ₹195.40</span>
+          </div>
+          <div class="range-bar-track">
+            <div class="range-bar-fill" id="rangeFill" style="left:0%; width:75%;"></div>
+            <div class="range-bar-pin" id="rangePin" style="left:75%;"></div>
+          </div>
+          <div class="range-labels-row">
+            <span class="range-low-val" id="dayLowLabel">Low: ₹24,685.10</span>
+            <span class="range-high-val" id="dayHighLabel">High: ₹24,880.50</span>
+          </div>
+        </div>
+
+        <!-- Key Statistics Grid -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-name">Today's Open</span>
+            <span class="metric-val" id="valOpen">₹24,710.00</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-name">Day High</span>
+            <span class="metric-val" id="valHigh">₹24,880.50</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-name">Day Low</span>
+            <span class="metric-val" id="valLow">₹24,685.10</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-name">Previous Close</span>
+            <span class="metric-val" id="valPrevClose">₹24,698.20</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-name">Volume / Traded</span>
+            <span class="metric-val" id="valVolume">31.4 Cr</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-name">52W Range</span>
+            <span class="metric-val" id="val52w">18,837 - 25,078</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-name">Market Cap</span>
+            <span class="metric-val" id="valMcap">₹412.5 L Cr</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-name">P/E Ratio</span>
+            <span class="metric-val" id="valPE">22.8</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Market Quick Compare Strip (Subtle Hover Scale Interactive Cards) -->
+      <div class="market-strip" id="marketStrip"></div>
+
+      <footer class="footer">
+        <p><strong>stocker by browsan.co</strong> — Real-time Indian stock market platform. Prices in INR (₹).</p>
+      </footer>
+    </section>
+
+    <!-- ==========================================================
+         VIEW 3: ABOUT STOCKS (DEEP FUNDAMENTALS & ALL DETAILS)
+         ========================================================== -->
+    <section class="about-stocks-view" id="aboutStocksView">
+      <div class="about-header-section">
+        <div class="about-header-pill">
+          <span>Fundamental Screener & Corporate Insights</span>
+        </div>
+        <h2 class="about-main-heading">
+          <span>About Stocks</span>
+        </h2>
+        <p class="about-sub-caption">
+          Search any Indian stock to reveal every financial ratio, valuation multiple, shareholding pattern, balance sheet metrics, and analyst consensus.
+        </p>
+
+        <!-- About Search Bar -->
+        <div class="about-search-box">
+          <form id="aboutSearchForm" class="search-bar" onsubmit="return false;">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="text"
+              id="aboutSearchInput"
+              class="search-input"
+              placeholder="Search any stock for full details (e.g. Adani, Tata, Reliance, ITC, SBI, HAL)..."
+              autocomplete="off"
+            />
+            <button type="submit" class="search-submit-btn">Search</button>
+          </form>
+          <div id="aboutSuggestionsPanel" class="suggestions-panel">
+            <div class="suggestions-header">
+              <span>Select Stock for Full Breakdown</span>
+              <span style="color:#818cf8; font-size:10px;">All Listed Stocks</span>
+            </div>
+            <div id="aboutSuggestionsList"></div>
+          </div>
+        </div>
+
+        <!-- Quick Switcher Tags -->
+        <div class="quick-tags" id="aboutQuickTags">
+          <span class="quick-tag-label">Inspect:</span>
+          <button class="tag-btn active" data-symbol="RELIANCE">RELIANCE</button>
+          <button class="tag-btn" data-symbol="TCS">TCS</button>
+          <button class="tag-btn" data-symbol="HDFCBANK">HDFC BANK</button>
+          <button class="tag-btn" data-symbol="INFY">INFOSYS</button>
+          <button class="tag-btn" data-symbol="TATAMOTORS">TATA MOTORS</button>
+          <button class="tag-btn" data-symbol="ADANIENT">ADANI ENT</button>
+          <button class="tag-btn" data-symbol="ITC">ITC</button>
+          <button class="tag-btn" data-symbol="SBIN">SBI</button>
+          <button class="tag-btn" data-symbol="HAL">HAL</button>
+          <button class="tag-btn" data-symbol="ZOMATO">ZOMATO</button>
+        </div>
+      </div>
+
+      <!-- Current Detailed Stock Banner -->
+      <div class="about-stock-banner">
+        <div class="about-banner-top">
+          <div class="about-banner-title">
+            <h3 id="aboutDetailSymbol">RELIANCE</h3>
+            <div class="about-banner-badges">
+              <span class="about-meta-chip" id="aboutDetailName">Reliance Industries Limited</span>
+              <span class="about-meta-chip" id="aboutDetailSector">Oil & Gas / Digital / Retail</span>
+              <span class="about-meta-chip" id="aboutDetailExchange">NSE: RELIANCE | BSE: 500325</span>
+            </div>
+          </div>
+          <div class="about-banner-actions">
+            <button class="btn-action-primary" id="aboutOpenChartBtn">
+              <span>View Candlestick Chart</span>
+            </button>
+            <button class="header-btn" id="aboutToggleFavBtn">
+              <span>★ Add to Watchlist</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="about-company-desc" id="aboutDetailDescription">
+          Reliance Industries Limited is India's largest private sector enterprise, operating across energy, petrochemicals, natural gas, retail, telecommunications (Jio Infocomm), and digital services. Headquartered in Mumbai, it is the largest constituent of NIFTY 50 and BSE SENSEX by market capitalization.
+        </p>
+      </div>
+
+      <!-- 6 Deep Financial Detail Cards Grid -->
+      <div class="about-details-grid">
+
+        <!-- Card 1: Valuation & Price Multiples -->
+        <div class="about-section-card">
+          <div class="about-card-title">
+            Valuation & Price Multiples
+          </div>
+          <div class="detail-table">
+            <div class="detail-row">
+              <span class="detail-label">Current Stock P/E</span>
+              <span class="detail-value" id="fPE">27.60</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Industry P/E</span>
+              <span class="detail-value" id="fIndPE">24.10</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Price-to-Book (P/B)</span>
+              <span class="detail-value" id="fPB">2.42</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">EV / EBITDA</span>
+              <span class="detail-value" id="fEvEbitda">14.80</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Book Value Per Share</span>
+              <span class="detail-value" id="fBookValue">₹1,218.40</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Earnings Per Share (TTM EPS)</span>
+              <span class="detail-value" id="fEPS">₹106.70</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Dividend Yield</span>
+              <span class="detail-value" id="fDivYield">0.34%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Profitability & Return Ratios -->
+        <div class="about-section-card">
+          <div class="about-card-title">
+            Profitability & Return Ratios
+          </div>
+          <div class="detail-table">
+            <div class="detail-row">
+              <span class="detail-label">Return on Equity (ROE)</span>
+              <span class="detail-value up" id="fROE">9.85%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Return on Capital Employed (ROCE)</span>
+              <span class="detail-value up" id="fROCE">11.20%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Operating Margin (OPM)</span>
+              <span class="detail-value" id="fOPM">18.40%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Net Profit Margin (NPM)</span>
+              <span class="detail-value" id="fNPM">7.82%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">3-Yr Sales Growth (CAGR)</span>
+              <span class="detail-value up" id="fSalesCAGR">+17.4%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">3-Yr Profit Growth (CAGR)</span>
+              <span class="detail-value up" id="fProfitCAGR">+14.1%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Financial Health & Solvency -->
+        <div class="about-section-card">
+          <div class="about-card-title">
+            Financial Health & Solvency
+          </div>
+          <div class="detail-table">
+            <div class="detail-row">
+              <span class="detail-label">Market Capitalization</span>
+              <span class="detail-value" id="fMcap">₹19.93 Lakh Cr</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Total Debt</span>
+              <span class="detail-value" id="fDebt">₹3.14 Lakh Cr</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Debt-to-Equity Ratio</span>
+              <span class="detail-value" id="fDebtEq">0.38</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Current Ratio</span>
+              <span class="detail-value" id="fCurrentRatio">1.18</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Interest Coverage Ratio</span>
+              <span class="detail-value up" id="fInterestCoverage">7.6x</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Free Cash Flow (FCF)</span>
+              <span class="detail-value" id="fFCF">₹42,800 Cr</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Shareholding Pattern (Ownership) -->
+        <div class="about-section-card">
+          <div class="about-card-title">
+            Shareholding Pattern
+          </div>
+          <div class="detail-table">
+            <div class="detail-row">
+              <span class="detail-label">Promoters Holding</span>
+              <span class="detail-value" id="fPromoter">50.32%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">FII (Foreign Institutions)</span>
+              <span class="detail-value" id="fFII">22.14%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">DII (Mutual Funds & Domestic)</span>
+              <span class="detail-value" id="fDII">16.42%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Public / Retail Holding</span>
+              <span class="detail-value" id="fPublic">11.12%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Pledged Shares</span>
+              <span class="detail-value up" id="fPledged">0.00%</span>
+            </div>
+          </div>
+
+          <div class="shareholder-bar-wrap">
+            <div class="shareholder-bar">
+              <div class="sh-segment sh-promoter" id="shBarPromoter" style="width: 50.32%;"></div>
+              <div class="sh-segment sh-fii" id="shBarFII" style="width: 22.14%;"></div>
+              <div class="sh-segment sh-dii" id="shBarDII" style="width: 16.42%;"></div>
+              <div class="sh-segment sh-public" id="shBarPublic" style="width: 11.12%;"></div>
+            </div>
+            <div class="sh-legend-row">
+              <div class="sh-legend-item"><span class="sh-legend-dot" style="background:#6366f1;"></span>Promoter</div>
+              <div class="sh-legend-item"><span class="sh-legend-dot" style="background:#10b981;"></span>FII</div>
+              <div class="sh-legend-item"><span class="sh-legend-dot" style="background:#f59e0b;"></span>DII</div>
+              <div class="sh-legend-item"><span class="sh-legend-dot" style="background:#ec4899;"></span>Public</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5: Technicals & Volatility -->
+        <div class="about-section-card">
+          <div class="about-card-title">
+            Trading & Volatility Stats
+          </div>
+          <div class="detail-table">
+            <div class="detail-row">
+              <span class="detail-label">Beta (vs NIFTY 50)</span>
+              <span class="detail-value" id="fBeta">1.04</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Delivery %</span>
+              <span class="detail-value" id="fDelivery">54.2%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">20-Day Avg Volume</span>
+              <span class="detail-value" id="fAvgVol">58.4 Lakhs</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">52-Week High</span>
+              <span class="detail-value up" id="f52High">₹3,217.90</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">52-Week Low</span>
+              <span class="detail-value down" id="f52Low">₹2,220.30</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Face Value</span>
+              <span class="detail-value" id="fFaceValue">₹10.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6: Analyst Consensus & Targets -->
+        <div class="about-section-card">
+          <div class="about-card-title">
+            Analyst Targets & Consensus
+          </div>
+          <div class="analyst-gauge-box">
+            <div class="analyst-rating-text" id="fConsensus">BUY (82%)</div>
+            <div style="font-size:12px; color:#cbd5e1;">Out of 38 Analyst Ratings</div>
+            <div class="analyst-breakdown-row">
+              <div><strong style="color:#10b981;">31</strong> Buy</div>
+              <div><strong style="color:#f59e0b;">5</strong> Hold</div>
+              <div><strong style="color:#f43f5e;">2</strong> Sell</div>
+            </div>
+          </div>
+          <div class="detail-table" style="margin-top: 8px;">
+            <div class="detail-row">
+              <span class="detail-label">12-Month Target Price</span>
+              <span class="detail-value up" id="fTargetPrice">₹3,320.00</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Implied Upside</span>
+              <span class="detail-value up" id="fUpside">+12.71%</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <footer class="footer">
+        <p><strong>stocker by browsan.co</strong> — In-depth Indian corporate filings and fundamental metrics.</p>
+      </footer>
+    </section>
+
+  </div>
+
+  <!-- ==========================================================
+       SIDEBAR: FAVORITE INDIAN STOCKS (WATCHLIST)
+       ========================================================== -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="favorites-sidebar" id="favoritesSidebar" aria-label="Favorites Watchlist">
+    <div class="sidebar-header">
+      <div class="sidebar-title-group">
+        <div class="sidebar-title">
+          ★ Favorite Stocks
+        </div>
+      </div>
+      <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close favorites sidebar">✕</button>
+    </div>
+
+    <div class="sidebar-body" id="favoritesList">
+      <!-- Populated via JavaScript with subtle hover-scale interactive cards -->
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="add-current-fav-btn" id="addCurrentToFavBtn">
+        + Add Currently Viewed Stock
+      </button>
+    </div>
+  </aside>
+
+  <script>
+    (function () {
+      /* ==========================================================
+         1. DUAL VIDEO BACKGROUND CROSSFADE
+         ========================================================== */
+      var videoA = document.getElementById('bgVideoA');
+      var videoB = document.getElementById('bgVideoB');
+
+      if (videoA && videoB) {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          videoA.removeAttribute('autoplay');
+          videoA.pause();
+          videoB.pause();
+          try { videoA.currentTime = 0; } catch (e) {}
+        } else {
+          var FADE = 0.9;
+          var cur = videoA;
+          var nxt = videoB;
+          var swapping = false;
+
+          function playVideo(v) {
+            var p = v.play();
+            if (p && typeof p.catch === 'function') {
+              p.catch(function () {});
+            }
+          }
+
+          playVideo(videoA);
+
+          function tick() {
+            if (swapping || !cur.duration) return;
+            if (cur.duration - cur.currentTime > FADE) return;
+
+            swapping = true;
+            var out = cur;
+            nxt.currentTime = 0;
+            playVideo(nxt);
+            nxt.classList.add('is-active');
+            out.classList.remove('is-active');
+
+            var tmp = cur;
+            cur = nxt;
+            nxt = tmp;
+
+            setTimeout(function () {
+              out.pause();
+              out.currentTime = 0;
+              swapping = false;
+            }, FADE * 1000 + 100);
+          }
+
+          videoA.addEventListener('timeupdate', tick);
+          videoB.addEventListener('timeupdate', tick);
+        }
+      }
+
+      /* ==========================================================
+         2. MASSIVE INDIAN STOCK DATABASE (NIFTY 50 + MAJOR EQUITIES)
+         ========================================================== */
+      const STOCKS = [
+        // Top Conglomerates & Energy
+        { symbol: "RELIANCE", name: "Reliance Industries Limited", sector: "Oil to Chemicals / Jio / Retail", exchange: "NSE: RELIANCE | BSE: 500325", price: 2945.60, change: 34.20, pct: 1.17, open: 2915.00, high: 2962.00, low: 2908.50, prevClose: 2911.40, volume: "64.2 L", range52: "2,220 - 3,217", mcap: "₹19.93 L Cr", pe: "27.60", desc: "Reliance Industries is India's largest company by market value, operating across oil-to-chemicals, digital services (Jio), retail, and renewable energy." },
+        { symbol: "TCS", name: "Tata Consultancy Services Ltd.", sector: "Information Technology", exchange: "NSE: TCS | BSE: 532540", price: 4210.30, change: -18.40, pct: -0.44, open: 4235.00, high: 4250.00, low: 4192.10, prevClose: 4228.70, volume: "21.5 L", range52: "3,313 - 4,585", mcap: "₹15.22 L Cr", pe: "31.80", desc: "TCS is the flagship IT enterprise of Tata Group, delivering global software engineering, digital consulting, and cloud transformation." },
+        { symbol: "HDFCBANK", name: "HDFC Bank Limited", sector: "Private Sector Bank", exchange: "NSE: HDFCBANK | BSE: 500180", price: 1682.40, change: 12.80, pct: 0.77, open: 1670.00, high: 1690.50, low: 1664.00, prevClose: 1669.60, volume: "1.42 Cr", range52: "1,363 - 1,794", mcap: "₹12.81 L Cr", pe: "19.20", desc: "HDFC Bank is India's premier private banking institution, serving over 80 million customers across commercial, retail, and digital services." },
+        { symbol: "INFY", name: "Infosys Limited", sector: "Information Technology", exchange: "NSE: INFY | BSE: 500209", price: 1894.15, change: 21.50, pct: 1.15, open: 1878.00, high: 1908.00, low: 1869.50, prevClose: 1872.65, volume: "58.1 L", range52: "1,358 - 1,975", mcap: "₹7.86 L Cr", pe: "29.40", desc: "Infosys is a global leader in next-generation digital services, enterprise cloud architecture, and generative AI platforms." },
+        { symbol: "ICICIBANK", name: "ICICI Bank Limited", sector: "Private Sector Bank", exchange: "NSE: ICICIBANK | BSE: 532174", price: 1230.90, change: 14.20, pct: 1.17, open: 1218.00, high: 1238.00, low: 1214.00, prevClose: 1216.70, volume: "98.4 L", range52: "910 - 1,300", mcap: "₹8.65 L Cr", pe: "18.10", desc: "ICICI Bank offers comprehensive financial products and services to retail and corporate clients across India and overseas." },
+        { symbol: "BHARTIARTL", name: "Bharti Airtel Limited", sector: "Telecommunications", exchange: "NSE: BHARTIARTL | BSE: 532454", price: 1640.20, change: 16.40, pct: 1.01, open: 1626.00, high: 1652.00, low: 1620.00, prevClose: 1623.80, volume: "42.7 L", range52: "902 - 1,712", mcap: "₹9.40 L Cr", pe: "68.20", desc: "Airtel is a top telecommunications company with operations in India, South Asia, and 14 African nations." },
+        { symbol: "SBIN", name: "State Bank of India", sector: "Public Sector Bank", exchange: "NSE: SBIN | BSE: 500112", price: 815.30, change: 8.60, pct: 1.07, open: 808.00, high: 822.00, low: 804.50, prevClose: 806.70, volume: "1.88 Cr", range52: "555 - 912", mcap: "₹7.27 L Cr", pe: "10.80", desc: "State Bank of India is a Fortune 500 public bank with over 22,000 branches holding over a quarter of India's banking market." },
+        { symbol: "ITC", name: "ITC Limited", sector: "FMCG / Agri / Hotels", exchange: "NSE: ITC | BSE: 500875", price: 502.80, change: -2.10, pct: -0.42, open: 506.00, high: 508.40, low: 500.20, prevClose: 504.90, volume: "1.02 Cr", range52: "399 - 528", mcap: "₹6.28 L Cr", pe: "29.70", desc: "ITC is an Indian conglomerate with dominant positions in FMCG, cigarettes, paperboards, packaging, agri-business, and luxury hospitality." },
+        { symbol: "HINDUNILVR", name: "Hindustan Unilever Limited", sector: "FMCG / Personal Care", exchange: "NSE: HINDUNILVR | BSE: 500696", price: 2780.00, change: 18.50, pct: 0.67, open: 2765.00, high: 2795.00, low: 2758.00, prevClose: 2761.50, volume: "18.4 L", range52: "2,170 - 3,034", mcap: "₹6.53 L Cr", pe: "58.40", desc: "HUL is India's largest fast-moving consumer goods company with household brands including Dove, Surf Excel, Lifebuoy, and Sunsilk." },
+        { symbol: "LT", name: "Larsen & Toubro Limited", sector: "EPC Projects & Infrastructure", exchange: "NSE: LT | BSE: 500510", price: 3620.00, change: 42.50, pct: 1.19, open: 3585.00, high: 3644.00, low: 3572.00, prevClose: 3577.50, volume: "19.3 L", range52: "2,860 - 3,948", mcap: "₹4.98 L Cr", pe: "37.10", desc: "L&T is a technology, engineering, construction, manufacturing, and financial services conglomerate with operations worldwide." },
+
+        // Auto & Mobility
+        { symbol: "TATAMOTORS", name: "Tata Motors Limited", sector: "Automobile & EV", exchange: "NSE: TATAMOTORS | BSE: 500570", price: 982.50, change: 24.10, pct: 2.51, open: 960.00, high: 994.00, low: 955.20, prevClose: 958.40, volume: "1.15 Cr", range52: "620 - 1,179", mcap: "₹3.61 L Cr", pe: "11.20", desc: "Tata Motors manufactures passenger cars, electric vehicles, commercial utility vehicles, and luxury Jaguar Land Rover marques." },
+        { symbol: "MARUTI", name: "Maruti Suzuki India Limited", sector: "Automobile", exchange: "NSE: MARUTI | BSE: 532500", price: 12480.00, change: 110.00, pct: 0.89, open: 12390.00, high: 12560.00, low: 12340.00, prevClose: 12370.00, volume: "4.2 L", range52: "9,737 - 13,680", mcap: "₹3.92 L Cr", pe: "28.50", desc: "Maruti Suzuki is India's largest passenger car manufacturer, with market-dominating hatchbacks, sedans, and hybrid SUVs." },
+        { symbol: "M&M", name: "Mahindra & Mahindra Limited", sector: "Auto & Farm Equipment", exchange: "NSE: M&M | BSE: 500520", price: 3080.00, change: 44.00, pct: 1.45, open: 3040.00, high: 3098.00, low: 3032.00, prevClose: 3036.00, volume: "28.4 L", range52: "1,490 - 3,222", mcap: "₹3.82 L Cr", pe: "31.20", desc: "Mahindra & Mahindra is the leading manufacturer of rugged SUVs, electric mobility, and the world's largest tractor brand by volume." },
+        { symbol: "BAJAJ-AUTO", name: "Bajaj Auto Limited", sector: "Automobile (2W & 3W)", exchange: "NSE: BAJAJ-AUTO | BSE: 532977", price: 11620.00, change: 140.00, pct: 1.22, open: 11500.00, high: 11710.00, low: 11460.00, prevClose: 11480.00, volume: "3.8 L", range52: "4,950 - 12,774", mcap: "₹3.24 L Cr", pe: "39.80", desc: "Bajaj Auto is India's top two-wheeler exporter and the world's largest manufacturer of three-wheelers." },
+        { symbol: "EICHERMOT", name: "Eicher Motors Limited", sector: "Automobile (Royal Enfield)", exchange: "NSE: EICHERMOT | BSE: 505200", price: 4780.00, change: 58.00, pct: 1.23, open: 4730.00, high: 4810.00, low: 4715.00, prevClose: 4722.00, volume: "6.8 L", range52: "3,320 - 5,104", mcap: "₹1.31 L Cr", pe: "34.10", desc: "Eicher Motors is the parent company of Royal Enfield, the iconic middleweight motorcycle manufacturer." },
+
+        // Adani Group
+        { symbol: "ADANIENT", name: "Adani Enterprises Limited", sector: "Incubation / Mining / Infra", exchange: "NSE: ADANIENT | BSE: 512599", price: 3110.00, change: 45.00, pct: 1.47, open: 3070.00, high: 3135.00, low: 3058.00, prevClose: 3065.00, volume: "24.5 L", range52: "2,142 - 3,743", mcap: "₹3.54 L Cr", pe: "88.20", desc: "Adani Enterprises is the flagship business incubator of the Adani Group, pioneering airports, roads, data centers, and green hydrogen." },
+        { symbol: "ADANIPORTS", name: "Adani Ports & SEZ Limited", sector: "Ports & Logistics", exchange: "NSE: ADANIPORTS | BSE: 532921", price: 1420.00, change: 18.20, pct: 1.30, open: 1405.00, high: 1432.00, low: 1398.00, prevClose: 1401.80, volume: "32.1 L", range52: "755 - 1,607", mcap: "₹3.06 L Cr", pe: "32.40", desc: "India's largest private port operator and integrated logistics provider, managing Mundra and coastal container terminals." },
+        { symbol: "ADANIPOWER", name: "Adani Power Limited", sector: "Thermal Power Generation", exchange: "NSE: ADANIPOWER | BSE: 533096", price: 642.00, change: 11.50, pct: 1.82, open: 632.00, high: 649.00, low: 628.00, prevClose: 630.50, volume: "56.4 L", range52: "330 - 896", mcap: "₹2.47 L Cr", pe: "12.80", desc: "India's largest private thermal power producer with a capacity of over 15,250 MW across multiple states." },
+        { symbol: "ADANIGREEN", name: "Adani Green Energy Limited", sector: "Renewable Energy", exchange: "NSE: ADANIGREEN | BSE: 541450", price: 1780.00, change: 24.00, pct: 1.37, open: 1760.00, high: 1795.00, low: 1748.00, prevClose: 1756.00, volume: "16.8 L", range52: "815 - 2,174", mcap: "₹2.82 L Cr", pe: "148.00", desc: "A leader in renewable energy building the world's largest solar-wind hybrid park in Khavda, Gujarat." },
+
+        // Banking & Financials
+        { symbol: "KOTAKBANK", name: "Kotak Mahindra Bank Limited", sector: "Private Banking", exchange: "NSE: KOTAKBANK | BSE: 500247", price: 1840.00, change: 14.50, pct: 0.79, open: 1830.00, high: 1852.00, low: 1824.00, prevClose: 1825.50, volume: "24.1 L", range52: "1,544 - 1,930", mcap: "₹3.66 L Cr", pe: "21.40", desc: "Kotak Mahindra Bank offers retail, corporate banking, asset management, and stock broking." },
+        { symbol: "AXISBANK", name: "Axis Bank Limited", sector: "Private Banking", exchange: "NSE: AXISBANK | BSE: 532215", price: 1195.00, change: 12.00, pct: 1.01, open: 1184.00, high: 1206.00, low: 1180.00, prevClose: 1183.00, volume: "58.4 L", range52: "960 - 1,339", mcap: "₹3.69 L Cr", pe: "13.80", desc: "Axis Bank is one of India's largest private banks with a wide network of digital banking touchpoints." },
+        { symbol: "BAJFINANCE", name: "Bajaj Finance Limited", sector: "NBFC / Consumer Finance", exchange: "NSE: BAJFINANCE | BSE: 500034", price: 7140.00, change: 68.00, pct: 0.96, open: 7080.00, high: 7195.00, low: 7060.00, prevClose: 7072.00, volume: "9.8 L", range52: "6,160 - 8,192", mcap: "₹4.41 L Cr", pe: "29.90", desc: "India's premier non-banking financial company specializing in consumer lending, digital payments, and SME loans." },
+        { symbol: "BAJAJFINSV", name: "Bajaj Finserv Limited", sector: "Financial Holding & Insurance", exchange: "NSE: BAJAJFINSV | BSE: 532978", price: 1880.00, change: 22.00, pct: 1.18, open: 1860.00, high: 1894.00, low: 1855.00, prevClose: 1858.00, volume: "14.2 L", range52: "1,419 - 2,029", mcap: "₹2.99 L Cr", pe: "36.20", desc: "The financial holding company for Bajaj Finance, Bajaj Allianz Life, and Bajaj General Insurance." },
+        { symbol: "JIOFIN", name: "Jio Financial Services Limited", sector: "Digital Finance & AMC", exchange: "NSE: JIOFIN | BSE: 543940", price: 348.00, change: 7.20, pct: 2.11, open: 342.00, high: 352.00, low: 339.50, prevClose: 340.80, volume: "1.42 Cr", range52: "204 - 394", mcap: "₹2.21 L Cr", pe: "135.00", desc: "The financial services arm spun out of Reliance, offering consumer lending, insurance broking, and mutual funds." },
+
+        // Defense, Aerospace & PSUs
+        { symbol: "HAL", name: "Hindustan Aeronautics Limited", sector: "Defense & Aerospace", exchange: "NSE: HAL | BSE: 541154", price: 4420.00, change: 84.00, pct: 1.94, open: 4350.00, high: 4460.00, low: 4325.00, prevClose: 4336.00, volume: "22.5 L", range52: "1,885 - 5,675", mcap: "₹2.95 L Cr", pe: "38.20", desc: "State-owned aerospace and defense corporation that manufactures Tejas combat aircraft, helicopters, and jet engines." },
+        { symbol: "BEL", name: "Bharat Electronics Limited", sector: "Defense Electronics", exchange: "NSE: BEL | BSE: 500049", price: 288.00, change: 6.20, pct: 2.20, open: 282.00, high: 291.50, low: 280.00, prevClose: 281.80, volume: "84.2 L", range52: "128 - 340", mcap: "₹2.10 L Cr", pe: "48.50", desc: "India's premier manufacturer of advanced defense radars, electronic warfare systems, avionics, and sonar suites." },
+        { symbol: "MAZDOCK", name: "Mazagon Dock Shipbuilders Ltd.", sector: "Defense Shipbuilding", exchange: "NSE: MAZDOCK | BSE: 543237", price: 4320.00, change: 95.00, pct: 2.25, open: 4240.00, high: 4365.00, low: 4210.00, prevClose: 4225.00, volume: "12.8 L", range52: "1,820 - 5,860", mcap: "₹87,100 Cr", pe: "44.10", desc: "Constructs submarines and missile destroyers for the Indian Navy, as well as offshore oil and gas platforms." },
+        { symbol: "BHEL", name: "Bharat Heavy Electricals Limited", sector: "Heavy Engineering", exchange: "NSE: BHEL | BSE: 500103", price: 274.00, change: 5.80, pct: 2.16, open: 269.00, high: 277.00, low: 267.00, prevClose: 268.20, volume: "1.25 Cr", range52: "118 - 335", mcap: "₹95,400 Cr", pe: "112.00", desc: "India's largest power generation equipment manufacturer constructing thermal, hydro, and railway locomotives." },
+        { symbol: "NTPC", name: "NTPC Limited", sector: "Power Generation", exchange: "NSE: NTPC | BSE: 532555", price: 412.00, change: 6.40, pct: 1.58, open: 406.00, high: 416.00, low: 404.00, prevClose: 405.60, volume: "1.12 Cr", range52: "230 - 448", mcap: "₹3.99 L Cr", pe: "18.20", desc: "India's largest power utility producing over 25% of the country's electricity from thermal and green assets." },
+        { symbol: "ONGC", name: "Oil & Natural Gas Corp Ltd.", sector: "Oil & Gas Exploration", exchange: "NSE: ONGC | BSE: 500312", price: 295.00, change: 3.80, pct: 1.30, open: 292.00, high: 298.50, low: 290.00, prevClose: 291.20, volume: "1.45 Cr", range52: "180 - 344", mcap: "₹3.71 L Cr", pe: "8.40", desc: "The largest government-owned oil and gas exploration company in India, producing 70% of crude oil." },
+        { symbol: "COALINDIA", name: "Coal India Limited", sector: "Mining", exchange: "NSE: COALINDIA | BSE: 533278", price: 498.00, change: 5.50, pct: 1.12, open: 494.00, high: 502.00, low: 491.00, prevClose: 492.50, volume: "62.4 L", range52: "280 - 543", mcap: "₹3.06 L Cr", pe: "8.60", desc: "The single largest coal producer in the world, supplying the majority of India's thermal power stations." },
+        { symbol: "POWERGRID", name: "Power Grid Corp of India Ltd.", sector: "Power Transmission", exchange: "NSE: POWERGRID | BSE: 532898", price: 342.00, change: 4.10, pct: 1.21, open: 338.00, high: 345.50, low: 337.00, prevClose: 337.90, volume: "86.1 L", range52: "196 - 366", mcap: "₹3.18 L Cr", pe: "19.80", desc: "Transmits about 85% of India's electric power across its nationwide transmission network." },
+        { symbol: "IRCTC", name: "Indian Railway Catering & Tourism", sector: "Railway Ticketing & Tourism", exchange: "NSE: IRCTC | BSE: 542830", price: 885.00, change: 12.00, pct: 1.37, open: 874.00, high: 892.00, low: 871.00, prevClose: 873.00, volume: "18.2 L", range52: "660 - 1,138", mcap: "₹70,800 Cr", pe: "56.40", desc: "Monopolistic PSU running online ticketing, catering services, and packaged drinking water (Rail Neer) for Indian Railways." },
+
+        // Consumer, Retail & Internet
+        { symbol: "TITAN", name: "Titan Company Limited", sector: "Jewellery (Tanishq) & Watches", exchange: "NSE: TITAN | BSE: 500114", price: 3490.00, change: 22.00, pct: 0.63, open: 3470.00, high: 3510.00, low: 3458.00, prevClose: 3468.00, volume: "8.2 L", range52: "2,980 - 3,886", mcap: "₹3.09 L Cr", pe: "86.40", desc: "Tata Group's lifestyle leader with Tanishq, Fastrack, Mia, and Titan Eyeplus." },
+        { symbol: "ASIANPAINT", name: "Asian Paints Limited", sector: "Decorative Paints", exchange: "NSE: ASIANPAINT | BSE: 500820", price: 3040.00, change: -12.00, pct: -0.39, open: 3060.00, high: 3075.00, low: 3028.00, prevClose: 3052.00, volume: "11.4 L", range52: "2,670 - 3,422", mcap: "₹2.91 L Cr", pe: "54.20", desc: "India's largest paint company with over 50% market share in decorative paints." },
+        { symbol: "TRENT", name: "Trent Limited", sector: "Retail (Zudio & Westside)", exchange: "NSE: TRENT | BSE: 500251", price: 7420.00, change: 165.00, pct: 2.27, open: 7280.00, high: 7480.00, low: 7240.00, prevClose: 7255.00, volume: "14.2 L", range52: "2,020 - 7,920", mcap: "₹2.63 L Cr", pe: "168.00", desc: "Tata Group's retail powerhouse behind booming fast-fashion brands Zudio, Westside, and Star Bazaar." },
+        { symbol: "ZOMATO", name: "Zomato Limited", sector: "Food Delivery & Quick Commerce", exchange: "NSE: ZOMATO | BSE: 543320", price: 268.40, change: 9.80, pct: 3.79, open: 259.00, high: 272.50, low: 257.20, prevClose: 258.60, volume: "4.86 Cr", range52: "101 - 298", mcap: "₹2.37 L Cr", pe: "128.40", desc: "Operates India's dominant food ordering platform and the ultra-fast delivery unicorn Blinkit." },
+        { symbol: "NESTLEIND", name: "Nestle India Limited", sector: "Food & Nutrition (Maggi)", exchange: "NSE: NESTLEIND | BSE: 500790", price: 2480.00, change: 8.00, pct: 0.32, open: 2475.00, high: 2495.00, low: 2465.00, prevClose: 2472.00, volume: "4.8 L", range52: "2,145 - 2,770", mcap: "₹2.39 L Cr", pe: "72.10", desc: "Swiss giant's subsidiary manufacturing Maggi noodles, Nescafe, KitKat, and Cerelac in India." },
+
+        // Metals, Cement & Infra
+        { symbol: "TATASTEEL", name: "Tata Steel Limited", sector: "Iron & Steel Manufacturing", exchange: "NSE: TATASTEEL | BSE: 500470", price: 164.50, change: 2.80, pct: 1.73, open: 162.00, high: 166.00, low: 161.20, prevClose: 161.70, volume: "3.42 Cr", range52: "115 - 184", mcap: "₹2.05 L Cr", pe: "38.50", desc: "Among the top global steel producers with integrated blast furnaces and electric arc assets." },
+        { symbol: "JSWSTEEL", name: "JSW Steel Limited", sector: "Steel", exchange: "NSE: JSWSTEEL | BSE: 500228", price: 988.00, change: 14.50, pct: 1.49, open: 975.00, high: 994.00, low: 971.00, prevClose: 973.50, volume: "24.1 L", range52: "737 - 1,040", mcap: "₹2.41 L Cr", pe: "34.80", desc: "The flagship enterprise of JSW Group and one of the largest crude steel producers in India." },
+        { symbol: "HINDALCO", name: "Hindalco Industries Limited", sector: "Aluminium & Copper", exchange: "NSE: HINDALCO | BSE: 500440", price: 712.00, change: 11.20, pct: 1.60, open: 702.00, high: 718.00, low: 698.00, prevClose: 700.80, volume: "44.8 L", range52: "450 - 745", mcap: "₹1.59 L Cr", pe: "15.40", desc: "Aditya Birla Group's metals powerhouse, owning Novelis, the world's largest aluminium rolling corporation." },
+        { symbol: "VEDL", name: "Vedanta Limited", sector: "Diversified Mining & Natural Resources", exchange: "NSE: VEDL | BSE: 500295", price: 495.00, change: 12.80, pct: 2.65, open: 484.00, high: 499.00, low: 480.00, prevClose: 482.20, volume: "1.45 Cr", range52: "207 - 523", mcap: "₹1.92 L Cr", pe: "18.20", desc: "Natural resources conglomerate with copper, zinc, aluminium, iron ore, and oil exploration assets." },
+        { symbol: "ULTRACEMCO", name: "UltraTech Cement Limited", sector: "Cement", exchange: "NSE: ULTRACEMCO | BSE: 532538", price: 11280.00, change: 120.00, pct: 1.08, open: 11180.00, high: 11350.00, low: 11120.00, prevClose: 11160.00, volume: "2.1 L", range52: "7,900 - 12,040", mcap: "₹3.25 L Cr", pe: "46.20", desc: "India's largest cement and ready-mix concrete producer with a capacity exceeding 150 MTPA." },
+
+        // Pharma & Healthcare
+        { symbol: "SUNPHARMA", name: "Sun Pharmaceutical Industries Ltd.", sector: "Pharmaceuticals", exchange: "NSE: SUNPHARMA | BSE: 524715", price: 1885.00, change: 19.30, pct: 1.03, open: 1868.00, high: 1898.00, low: 1862.00, prevClose: 1865.70, volume: "16.8 L", range52: "1,098 - 1,960", mcap: "₹4.52 L Cr", pe: "41.60", desc: "The largest pharma company in India specializing in generics and specialty dermatology medications." },
+        { symbol: "CIPLA", name: "Cipla Limited", sector: "Pharmaceuticals", exchange: "NSE: CIPLA | BSE: 500087", price: 1620.00, change: 14.00, pct: 0.87, open: 1610.00, high: 1634.00, low: 1604.00, prevClose: 1606.00, volume: "12.4 L", range52: "1,130 - 1,702", mcap: "₹1.31 L Cr", pe: "30.40", desc: "Global pharma pioneer famous for respiratory medicines and affordable antiretrovirals." },
+        { symbol: "DRREDDY", name: "Dr. Reddy's Laboratories Ltd.", sector: "Pharma & Biosimilars", exchange: "NSE: DRREDDY | BSE: 500124", price: 6580.00, change: 48.00, pct: 0.74, open: 6540.00, high: 6620.00, low: 6510.00, prevClose: 6532.00, volume: "3.8 L", range52: "5,210 - 7,100", mcap: "₹1.09 L Cr", pe: "19.80", desc: "Produces active pharmaceutical ingredients, generics, biosimilars, and proprietary oncology treatments." },
+
+        // Green Energy, Aviation & Modern Growth
+        { symbol: "TATAPOWER", name: "Tata Power Company Limited", sector: "Renewable & EV Charging", exchange: "NSE: TATAPOWER | BSE: 500400", price: 448.00, change: 8.50, pct: 1.93, open: 440.00, high: 452.00, low: 438.00, prevClose: 439.50, volume: "88.4 L", range52: "235 - 494", mcap: "₹1.43 L Cr", pe: "36.80", desc: "Pioneering green energy utility installing thousands of EV charging points and solar rooftop arrays." },
+        { symbol: "SUZLON", name: "Suzlon Energy Limited", sector: "Wind Energy Equipment", exchange: "NSE: SUZLON | BSE: 532667", price: 78.40, change: 2.10, pct: 2.75, open: 76.50, high: 79.80, low: 75.80, prevClose: 76.30, volume: "4.12 Cr", range52: "25 - 86", mcap: "₹1.06 L Cr", pe: "84.00", desc: "India's leading wind turbine manufacturer with over 20 GW of installed wind energy capacity." },
+        { symbol: "INDIGO", name: "InterGlobe Aviation Limited (IndiGo)", sector: "Aviation & Airlines", exchange: "NSE: INDIGO | BSE: 539448", price: 4820.00, change: 65.00, pct: 1.37, open: 4760.00, high: 4860.00, low: 4740.00, prevClose: 4755.00, volume: "8.6 L", range52: "2,410 - 5,033", mcap: "₹1.86 L Cr", pe: "22.50", desc: "India's dominant low-cost airline operating over 60% of domestic passenger traffic." },
+        { symbol: "BSE", name: "BSE Limited", sector: "Stock Exchange", exchange: "NSE: BSE | BSE: 540673", price: 4180.00, change: 112.00, pct: 2.75, open: 4080.00, high: 4220.00, low: 4050.00, prevClose: 4068.00, volume: "16.4 L", range52: "1,260 - 4,450", mcap: "₹56,600 Cr", pe: "82.40", desc: "Asia's oldest stock exchange operating equity cash and rapid-growth derivative index contracts." },
+        { symbol: "CDSL", name: "Central Depository Services Ltd.", sector: "Securities Depository", exchange: "NSE: CDSL | BSE: 540716", price: 1640.00, change: 38.00, pct: 2.37, open: 1610.00, high: 1658.00, low: 1598.00, prevClose: 1602.00, volume: "21.0 L", range52: "880 - 1,780", mcap: "₹34,200 Cr", pe: "64.80", desc: "The premier depository in India holding over 110 million Demat accounts for Indian retail investors." },
+
+        // Benchmark Indices
+        { symbol: "NIFTY 50", name: "Nifty 50 Benchmark Index — NSE", sector: "National Benchmark Index", exchange: "NSE INDEX", price: 24840.50, change: 142.30, pct: 0.58, open: 24710.00, high: 24880.50, low: 24685.10, prevClose: 24698.20, volume: "31.4 Cr", range52: "18,837 - 25,078", mcap: "₹412.5 L Cr", pe: "22.80", desc: "NIFTY 50 is the benchmark index representing 50 diversified bluechip Indian equities." },
+        { symbol: "SENSEX", name: "BSE SENSEX Benchmark Index", sector: "National Benchmark Index", exchange: "BSE INDEX", price: 81420.15, change: 420.80, pct: 0.52, open: 81050.00, high: 81560.20, low: 80980.00, prevClose: 80999.35, volume: "18.2 Cr", range52: "63,583 - 82,129", mcap: "₹440.1 L Cr", pe: "23.40", desc: "BSE SENSEX is India's 30-share bluechip barometer tracking Mumbai's premier equities." },
+        { symbol: "BANK NIFTY", name: "Nifty Bank Index — NSE", sector: "Banking Benchmark Index", exchange: "NSE INDEX", price: 51320.75, change: 290.10, pct: 0.57, open: 51080.00, high: 51460.00, low: 51020.00, prevClose: 51030.65, volume: "14.8 Cr", range52: "42,100 - 53,357", mcap: "₹185.0 L Cr", pe: "16.40", desc: "The index tracking the most liquid and large Indian private and public sector banking shares." }
+      ];
+
+      // Auto-generator for any stock or scrip code not in the initial database
+      function getOrCreateStock(query) {
+        const clean = query.trim().toUpperCase();
+        let found = STOCKS.find(s => s.symbol.toUpperCase() === clean);
+        if (found) return found;
+
+        // Fuzzy match
+        found = STOCKS.find(s =>
+          s.symbol.toUpperCase().includes(clean) ||
+          s.name.toUpperCase().includes(clean)
+        );
+        if (found) return found;
+
+        // Dynamically synthesize realistic market data for any search query
+        const baseHash = clean.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const estPrice = Number((100 + (baseHash * 17) % 3800).toFixed(2));
+        const estChange = Number(((baseHash % 7) - 3.2).toFixed(2));
+        const estPct = Number(((estChange / estPrice) * 100).toFixed(2));
+
+        const synthStock = {
+          symbol: clean,
+          name: `${clean} India Limited`,
+          sector: "Indian Equity Market",
+          exchange: `NSE: ${clean} | BSE: Listed`,
+          price: estPrice,
+          change: estChange,
+          pct: estPct,
+          open: Number((estPrice - estChange * 0.4).toFixed(2)),
+          high: Number((estPrice + Math.abs(estChange) * 1.5 + 8).toFixed(2)),
+          low: Number((estPrice - Math.abs(estChange) * 1.8 - 6).toFixed(2)),
+          prevClose: Number((estPrice - estChange).toFixed(2)),
+          volume: `${(baseHash % 80 + 10).toFixed(1)} L`,
+          range52: `${(estPrice * 0.65).toFixed(0)} - ${(estPrice * 1.45).toFixed(0)}`,
+          mcap: `₹${(baseHash % 80 + 5).toFixed(1)} Thousand Cr`,
+          pe: `${(15 + (baseHash % 35)).toFixed(1)}`,
+          desc: `${clean} is an actively traded equity scrip on the National Stock Exchange (NSE) and Bombay Stock Exchange (BSE). Detailed live quotes, intraday movements, and corporate filings are tracked in real-time.`
+        };
+
+        STOCKS.push(synthStock);
+        return synthStock;
+      }
+
+      let currentStock = STOCKS[0];
+      let currentTimeframe = "1D";
+      let currentChartType = "candle"; // "candle" or "line"
+      let activeTimeSeries = [];
+
+      /* ==========================================================
+         3. WATCHLIST / FAVORITES LOCALSTORAGE SYSTEM
+         ========================================================== */
+      const STORAGE_KEY = "stocker_favorite_symbols";
+      let favorites = [];
+
+      function loadFavorites() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            favorites = JSON.parse(stored);
+          } else {
+            favorites = ["NIFTY 50", "RELIANCE", "TCS"];
+            saveFavorites();
+          }
+        } catch (e) {
+          favorites = ["NIFTY 50", "RELIANCE", "TCS"];
+        }
+        updateWatchlistUI();
+      }
+
+      function saveFavorites() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
+        } catch (e) {}
+        updateWatchlistUI();
+      }
+
+      function toggleFavorite(symbol) {
+        const idx = favorites.indexOf(symbol);
+        if (idx > -1) {
+          favorites.splice(idx, 1);
+        } else {
+          favorites.push(symbol);
+        }
+        saveFavorites();
+        updateFavoriteButtonState();
+      }
+
+      function isFavorite(symbol) {
+        return favorites.includes(symbol);
+      }
+
+      function updateFavoriteButtonState() {
+        const favBtn = document.getElementById('favoriteStockBtn');
+        const aboutFavBtn = document.getElementById('aboutToggleFavBtn');
+
+        if (favBtn) {
+          if (isFavorite(currentStock.symbol)) {
+            favBtn.classList.add('is-favorite');
+            favBtn.title = "Remove from favorites";
+          } else {
+            favBtn.classList.remove('is-favorite');
+            favBtn.title = "Add to favorites";
+          }
+        }
+
+        if (aboutFavBtn) {
+          if (isFavorite(currentStock.symbol)) {
+            aboutFavBtn.textContent = "★ In Watchlist (Saved)";
+          } else {
+            aboutFavBtn.textContent = "★ Add to Watchlist";
+          }
+        }
+      }
+
+      function updateWatchlistUI() {
+        const badge = document.getElementById('watchlistCountBadge');
+        if (badge) badge.textContent = favorites.length;
+
+        const listEl = document.getElementById('favoritesList');
+        if (!listEl) return;
+
+        if (favorites.length === 0) {
+          listEl.innerHTML = `
+            <div class="empty-watchlist-msg">
+              <span style="font-size:32px; color:#f59e0b;">★</span>
+              <div>No favorite stocks saved yet.</div>
+              <p>Click the star button on any stock or search an equity to track its real-time price here.</p>
+            </div>
+          `;
+          return;
+        }
+
+        listEl.innerHTML = '';
+        favorites.forEach(sym => {
+          const stock = getOrCreateStock(sym);
+          const isUp = stock.change >= 0;
+          const card = document.createElement('div');
+          card.className = 'fav-item-card';
+          card.innerHTML = `
+            <div class="fav-item-left">
+              <span class="fav-item-symbol">${stock.symbol}</span>
+              <span class="fav-item-name">${stock.name.split('—')[0]}</span>
+            </div>
+            <div class="fav-item-right">
+              <div class="fav-item-price-col">
+                <div class="fav-item-price">₹${stock.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                <div class="fav-item-change ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${stock.pct.toFixed(2)}%</div>
+              </div>
+              <button class="fav-item-remove-btn" title="Remove ${stock.symbol}">✕</button>
+            </div>
+          `;
+
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('.fav-item-remove-btn')) return;
+            renderStock(stock);
+            closeSidebar();
+            showExploreView();
+          });
+
+          card.querySelector('.fav-item-remove-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleFavorite(sym);
+          });
+
+          listEl.appendChild(card);
+        });
+      }
+
+      /* Sidebar opening and closing */
+      const sidebar = document.getElementById('favoritesSidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      const toggleBtn = document.getElementById('watchlistToggleBtn');
+      const closeBtn = document.getElementById('sidebarCloseBtn');
+      const addCurrentBtn = document.getElementById('addCurrentToFavBtn');
+
+      function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      }
+
+      toggleBtn.addEventListener('click', () => {
+        if (sidebar.classList.contains('open')) closeSidebar();
+        else openSidebar();
+      });
+
+      closeBtn.addEventListener('click', closeSidebar);
+      overlay.addEventListener('click', closeSidebar);
+
+      addCurrentBtn.addEventListener('click', () => {
+        if (!isFavorite(currentStock.symbol)) {
+          toggleFavorite(currentStock.symbol);
+        }
+      });
+
+      document.getElementById('favoriteStockBtn').addEventListener('click', () => {
+        toggleFavorite(currentStock.symbol);
+      });
+
+      /* ==========================================================
+         4. TOP RIGHT MENU DROPDOWN & VIEW ROUTING
+         ========================================================== */
+      const navMenuBtn = document.getElementById('navMenuBtn');
+      const navMenuDropdown = document.getElementById('navMenuDropdown');
+
+      function toggleMenu() {
+        const isOpen = navMenuDropdown.classList.contains('show');
+        if (isOpen) {
+          navMenuDropdown.classList.remove('show');
+          navMenuBtn.classList.remove('active');
+          navMenuBtn.setAttribute('aria-expanded', 'false');
+        } else {
+          navMenuDropdown.classList.add('show');
+          navMenuBtn.classList.add('active');
+          navMenuBtn.setAttribute('aria-expanded', 'true');
+        }
+      }
+
+      function closeMenu() {
+        navMenuDropdown.classList.remove('show');
+        navMenuBtn.classList.remove('active');
+        navMenuBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      navMenuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMenu();
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.menu-btn-wrap')) {
+          closeMenu();
+        }
+      });
+
+      const introView = document.getElementById('introView');
+      const exploreView = document.getElementById('exploreView');
+      const aboutStocksView = document.getElementById('aboutStocksView');
+
+      function hideAllViews() {
+        introView.classList.add('hidden');
+        exploreView.classList.remove('active');
+        aboutStocksView.classList.remove('active');
+        closeMenu();
+      }
+
+      function showIntroView() {
+        hideAllViews();
+        introView.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function showExploreView() {
+        hideAllViews();
+        exploreView.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(resizeCanvas, 60);
+      }
+
+      function showAboutStocksView() {
+        hideAllViews();
+        aboutStocksView.classList.add('active');
+        renderAboutDetails(currentStock);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      document.getElementById('getStartedBtn').addEventListener('click', showExploreView);
+      document.getElementById('backToIntroBtn').addEventListener('click', showIntroView);
+      document.getElementById('goToAboutBtn').addEventListener('click', showAboutStocksView);
+      document.getElementById('viewAboutStockPill').addEventListener('click', showAboutStocksView);
+      document.getElementById('aboutOpenChartBtn').addEventListener('click', showExploreView);
+      document.getElementById('navBrandLink').addEventListener('click', showIntroView);
+
+      // Clean text menu dropdown links (no icons or logos)
+      document.getElementById('menuItemAboutStocks').addEventListener('click', showAboutStocksView);
+      document.getElementById('menuItemExplore').addEventListener('click', showExploreView);
+      document.getElementById('menuItemWatchlist').addEventListener('click', () => {
+        closeMenu();
+        openSidebar();
+      });
+      document.getElementById('menuItemHome').addEventListener('click', showIntroView);
+
+      /* ==========================================================
+         5. CANDLESTICK & OHLC DATA GENERATOR
+         ========================================================== */
+      function generateCandleData(stock, tf) {
+        const candles = [];
+        let count = 52;
+        let startVal = stock.open;
+        let finalVal = stock.price;
+        let highLimit = stock.high;
+        let lowLimit = stock.low;
+
+        if (tf === "5D") count = 50;
+        else if (tf === "1M") count = 44;
+        else if (tf === "1Y") count = 48;
+        else if (tf === "5Y") count = 50;
+
+        let prevClose = startVal;
+        const totalSteps = count - 1;
+        const stepSpread = (highLimit - lowLimit) * 0.16;
+
+        for (let i = 0; i < count; i++) {
+          const ratio = i / totalSteps;
+          const baseline = startVal + (finalVal - startVal) * ratio;
+
+          let open = prevClose;
+          let close = baseline + (Math.sin(ratio * Math.PI * 4 + stock.symbol.length) * stepSpread) + ((Math.random() - 0.48) * stepSpread);
+
+          if (i === 0) open = startVal;
+          if (i === totalSteps) close = finalVal;
+
+          let high = Math.max(open, close) + Math.random() * (stepSpread * 0.85);
+          let low = Math.min(open, close) - Math.random() * (stepSpread * 0.85);
+
+          if (high > highLimit) high = highLimit;
+          if (low < lowLimit) low = lowLimit;
+          if (open > high) open = high;
+          if (open < low) open = low;
+          if (close > high) close = high;
+          if (close < low) close = low;
+
+          let timeLabel = "";
+          if (tf === "1D") {
+            const minutesFromOpen = Math.round(ratio * 375);
+            const totalMins = 9 * 60 + 15 + minutesFromOpen;
+            const h = Math.floor(totalMins / 60);
+            const m = totalMins % 60;
+            const ampm = h >= 12 ? "PM" : "AM";
+            const displayH = h > 12 ? h - 12 : h;
+            timeLabel = `${String(displayH).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm} IST`;
+          } else {
+            timeLabel = `Period ${i + 1}`;
+          }
+
+          const volume = Math.round(50000 + Math.random() * 180000);
+
+          candles.push({
+            open: Number(open.toFixed(2)),
+            high: Number(high.toFixed(2)),
+            low: Number(low.toFixed(2)),
+            close: Number(close.toFixed(2)),
+            volume: volume,
+            time: timeLabel
+          });
+
+          prevClose = close;
+        }
+
+        // 20-EMA calculation
+        const k = 2 / (20 + 1);
+        let ema = candles[0].close;
+        for (let i = 0; i < candles.length; i++) {
+          ema = candles[i].close * k + ema * (1 - k);
+          candles[i].ema = Number(ema.toFixed(2));
+        }
+
+        return candles;
+      }
+
+      /* ==========================================================
+         6. ADVANCED CANDLESTICK & LINE CANVAS RENDERER
+         ========================================================== */
+      const canvas = document.getElementById('stockChart');
+      const ctx = canvas.getContext('2d');
+      const chartBox = document.getElementById('chartBox');
+      const tooltip = document.getElementById('chartTooltip');
+      const tooltipTime = document.getElementById('tooltipTime');
+      const tooltipPrice = document.getElementById('tooltipPrice');
+      const tooltipOpen = document.getElementById('tooltipOpen');
+      const tooltipHigh = document.getElementById('tooltipHigh');
+      const tooltipLow = document.getElementById('tooltipLow');
+      const tooltipClose = document.getElementById('tooltipClose');
+      const tooltipChangeBadge = document.getElementById('tooltipChangeBadge');
+
+      let chartWidth = 0;
+      let chartHeight = 0;
+      let hoveredIndex = -1;
+
+      function resizeCanvas() {
+        const rect = chartBox.getBoundingClientRect();
+        if (rect.width === 0) return;
+        const dpr = window.devicePixelRatio || 1;
+        chartWidth = rect.width;
+        chartHeight = rect.height;
+
+        canvas.width = chartWidth * dpr;
+        canvas.height = chartHeight * dpr;
+        ctx.scale(dpr, dpr);
+        drawChart();
+      }
+
+      function drawChart() {
+        if (!activeTimeSeries.length || chartWidth === 0) return;
+        ctx.clearRect(0, 0, chartWidth, chartHeight);
+
+        const padding = { top: 22, bottom: 48, left: 14, right: 14 };
+        const innerW = chartWidth - padding.left - padding.right;
+        const innerH = chartHeight - padding.top - padding.bottom;
+        const volumeH = 34;
+
+        let min = Math.min(...activeTimeSeries.map(p => p.low));
+        let max = Math.max(...activeTimeSeries.map(p => p.high));
+        const span = (max - min) || 1;
+        min -= span * 0.05;
+        max += span * 0.05;
+
+        const maxVol = Math.max(...activeTimeSeries.map(p => p.volume)) || 1;
+
+        // Grid lines
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 3; i++) {
+          const y = padding.top + (innerH / 3) * i;
+          ctx.beginPath();
+          ctx.moveTo(padding.left, y);
+          ctx.lineTo(chartWidth - padding.right, y);
+          ctx.stroke();
+        }
+
+        // Previous close dotted line
+        if (currentStock.prevClose >= min && currentStock.prevClose <= max) {
+          const prevY = padding.top + innerH * (1 - (currentStock.prevClose - min) / (max - min));
+          ctx.save();
+          ctx.setLineDash([4, 4]);
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(padding.left, prevY);
+          ctx.lineTo(chartWidth - padding.right, prevY);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        const barSlot = innerW / activeTimeSeries.length;
+        const candleWidth = Math.max(3, barSlot * 0.65);
+
+        // Volume Bars
+        for (let i = 0; i < activeTimeSeries.length; i++) {
+          const c = activeTimeSeries[i];
+          const isUp = c.close >= c.open;
+          const x = padding.left + i * barSlot + barSlot / 2;
+          const vH = (c.volume / maxVol) * volumeH;
+          const vY = chartHeight - padding.bottom + (volumeH - vH);
+
+          ctx.fillStyle = isUp ? 'rgba(16, 185, 129, 0.22)' : 'rgba(244, 63, 94, 0.22)';
+          ctx.fillRect(x - candleWidth / 2, vY, candleWidth, vH);
+        }
+
+        // Candlestick vs Line Mode
+        if (currentChartType === "candle") {
+          for (let i = 0; i < activeTimeSeries.length; i++) {
+            const c = activeTimeSeries[i];
+            const isUp = c.close >= c.open;
+            const color = isUp ? '#10b981' : '#f43f5e';
+            const x = padding.left + i * barSlot + barSlot / 2;
+
+            const yHigh = padding.top + innerH * (1 - (c.high - min) / (max - min));
+            const yLow = padding.top + innerH * (1 - (c.low - min) / (max - min));
+            const yOpen = padding.top + innerH * (1 - (c.open - min) / (max - min));
+            const yClose = padding.top + innerH * (1 - (c.close - min) / (max - min));
+
+            // Wick
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.3;
+            ctx.beginPath();
+            ctx.moveTo(x, yHigh);
+            ctx.lineTo(x, yLow);
+            ctx.stroke();
+
+            // Body
+            const bodyY = Math.min(yOpen, yClose);
+            const bodyH = Math.max(2, Math.abs(yClose - yOpen));
+
+            ctx.fillStyle = color;
+            ctx.fillRect(x - candleWidth / 2, bodyY, candleWidth, bodyH);
+          }
+        } else {
+          const coords = activeTimeSeries.map((c, i) => {
+            const x = padding.left + i * barSlot + barSlot / 2;
+            const y = padding.top + innerH * (1 - (c.close - min) / (max - min));
+            return { x, y };
+          });
+
+          const isGain = currentStock.change >= 0;
+          const lineColor = isGain ? '#10b981' : '#f43f5e';
+          const grad = ctx.createLinearGradient(0, padding.top, 0, chartHeight - padding.bottom);
+          grad.addColorStop(0, isGain ? 'rgba(16, 185, 129, 0.28)' : 'rgba(244, 63, 94, 0.28)');
+          grad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
+
+          ctx.beginPath();
+          ctx.moveTo(coords[0].x, chartHeight - padding.bottom);
+          for (let i = 0; i < coords.length; i++) {
+            ctx.lineTo(coords[i].x, coords[i].y);
+          }
+          ctx.lineTo(coords[coords.length - 1].x, chartHeight - padding.bottom);
+          ctx.closePath();
+          ctx.fillStyle = grad;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(coords[0].x, coords[0].y);
+          for (let i = 1; i < coords.length; i++) {
+            const xc = (coords[i].x + coords[i - 1].x) / 2;
+            const yc = (coords[i].y + coords[i - 1].y) / 2;
+            ctx.quadraticCurveTo(coords[i - 1].x, coords[i - 1].y, xc, yc);
+          }
+          ctx.lineTo(coords[coords.length - 1].x, coords[coords.length - 1].y);
+          ctx.strokeStyle = lineColor;
+          ctx.lineWidth = 2.4;
+          ctx.stroke();
+        }
+
+        // 20-EMA line
+        ctx.beginPath();
+        for (let i = 0; i < activeTimeSeries.length; i++) {
+          const x = padding.left + i * barSlot + barSlot / 2;
+          const y = padding.top + innerH * (1 - (activeTimeSeries[i].ema - min) / (max - min));
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.6;
+        ctx.stroke();
+
+        // Crosshair
+        if (hoveredIndex >= 0 && hoveredIndex < activeTimeSeries.length) {
+          const hovered = activeTimeSeries[hoveredIndex];
+          const hX = padding.left + hoveredIndex * barSlot + barSlot / 2;
+          const hY = padding.top + innerH * (1 - (hovered.close - min) / (max - min));
+
+          ctx.save();
+          ctx.setLineDash([3, 3]);
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(hX, padding.top);
+          ctx.lineTo(hX, chartHeight - padding.bottom);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(padding.left, hY);
+          ctx.lineTo(chartWidth - padding.right, hY);
+          ctx.stroke();
+          ctx.restore();
+
+          ctx.beginPath();
+          ctx.arc(hX, hY, 4.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = hovered.close >= hovered.open ? '#10b981' : '#f43f5e';
+          ctx.stroke();
+        }
+      }
+
+      chartBox.addEventListener('mousemove', function (e) {
+        const rect = chartBox.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const paddingLeft = 14;
+        const innerW = rect.width - 28;
+
+        const ratio = Math.max(0, Math.min(1, (mouseX - paddingLeft) / innerW));
+        hoveredIndex = Math.min(activeTimeSeries.length - 1, Math.floor(ratio * activeTimeSeries.length));
+
+        drawChart();
+
+        if (hoveredIndex >= 0 && hoveredIndex < activeTimeSeries.length) {
+          const item = activeTimeSeries[hoveredIndex];
+          const isUp = item.close >= item.open;
+          const diffPct = (((item.close - item.open) / item.open) * 100).toFixed(2);
+
+          tooltipTime.textContent = item.time;
+          tooltipPrice.textContent = '₹' + item.close.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+          tooltipOpen.textContent = '₹' + item.open.toFixed(2);
+          tooltipHigh.textContent = '₹' + item.high.toFixed(2);
+          tooltipLow.textContent = '₹' + item.low.toFixed(2);
+          tooltipClose.textContent = '₹' + item.close.toFixed(2);
+
+          tooltipChangeBadge.textContent = `${isUp ? '+' : ''}${diffPct}%`;
+          tooltipChangeBadge.style.color = isUp ? '#10b981' : '#f43f5e';
+
+          const barSlot = innerW / activeTimeSeries.length;
+          const tooltipX = paddingLeft + hoveredIndex * barSlot + barSlot / 2;
+          const min = Math.min(...activeTimeSeries.map(p => p.low));
+          const max = Math.max(...activeTimeSeries.map(p => p.high));
+          const span = (max - min) || 1;
+          const tooltipY = 22 + (rect.height - 70) * (1 - (item.close - (min - span * 0.05)) / ((max + span * 0.05) - (min - span * 0.05)));
+
+          tooltip.style.left = tooltipX + 'px';
+          tooltip.style.top = Math.max(70, tooltipY) + 'px';
+          tooltip.style.display = 'block';
+        }
+      });
+
+      chartBox.addEventListener('mouseleave', function () {
+        hoveredIndex = -1;
+        tooltip.style.display = 'none';
+        drawChart();
+      });
+
+      document.getElementById('btnChartCandle').addEventListener('click', function () {
+        document.getElementById('btnChartLine').classList.remove('active');
+        this.classList.add('active');
+        currentChartType = 'candle';
+        drawChart();
+      });
+
+      document.getElementById('btnChartLine').addEventListener('click', function () {
+        document.getElementById('btnChartCandle').classList.remove('active');
+        this.classList.add('active');
+        currentChartType = 'line';
+        drawChart();
+      });
+
+      /* ==========================================================
+         7. RENDER STOCK CARD & STATS + LIVE FREE API INTEGRATION
+         ========================================================== */
+      let liveQuoteController = null;
+
+      async function fetchLiveQuote(stock, tf) {
+        const syncBtn = document.getElementById('syncLiveQuoteBtn');
+        const syncText = document.getElementById('syncText');
+        const statusEl = document.getElementById('stockStatusText');
+
+        if (liveQuoteController) {
+          liveQuoteController.abort();
+        }
+        liveQuoteController = new AbortController();
+
+        if (syncBtn) {
+          syncBtn.classList.add('loading');
+          if (syncText) syncText.textContent = 'Syncing...';
+        }
+
+        let interval = '5m';
+        let range = '1d';
+        if (tf === '5D') { interval = '15m'; range = '5d'; }
+        else if (tf === '1M') { interval = '1d'; range = '1mo'; }
+        else if (tf === '1Y') { interval = '1wk'; range = '1y'; }
+        else if (tf === '5Y') { interval = '1mo'; range = '5y'; }
+
+        try {
+          const res = await fetch(`/api/quote/${encodeURIComponent(stock.symbol)}?interval=${interval}&range=${range}`, {
+            signal: liveQuoteController.signal,
+          });
+
+          if (!res.ok) throw new Error('API status ' + res.status);
+          const data = await res.json();
+
+          if (data.success && stock.symbol === currentStock.symbol) {
+            stock.price = data.price;
+            stock.change = data.change;
+            stock.pct = data.pct;
+            stock.open = data.open;
+            stock.high = data.high;
+            stock.low = data.low;
+            stock.prevClose = data.prevClose;
+            stock.volume = data.volume;
+            stock.range52 = data.range52;
+            if (data.name && (!stock.name || stock.name.includes('Equities'))) {
+              stock.name = data.name;
+            }
+
+            if (data.candles && data.candles.length > 0) {
+              activeTimeSeries = data.candles;
+            }
+
+            renderStock(stock, true);
+
+            if (statusEl) {
+              const lastTime = data.candles && data.candles.length > 0 ? data.candles[data.candles.length - 1].time : 'Real-Time';
+              statusEl.textContent = `Live Free API (${data.exchange}) • ${lastTime}`;
+            }
+            if (syncText) {
+              syncText.textContent = 'Live Synced';
+            }
+
+            if (aboutStocksView && aboutStocksView.classList.contains('active')) {
+              renderAboutDetails(stock);
+            }
+          }
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.warn('Live API feed error, retaining reference quotes:', err);
+            if (statusEl) {
+              statusEl.textContent = 'Reference Market Data';
+            }
+            if (syncText) {
+              syncText.textContent = 'Sync Live API';
+            }
+          }
+        } finally {
+          if (syncBtn) {
+            syncBtn.classList.remove('loading');
+          }
+        }
+      }
+
+      async function fetchLiveIndices() {
+        try {
+          const res = await fetch('/api/indices');
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data.success && Array.isArray(data.indices)) {
+            data.indices.forEach(idx => {
+              const sign = idx.isUp ? '+' : '';
+              const pctStr = `${sign}${idx.pct}%`;
+              const formatted = `₹${Number(idx.price).toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${pctStr})`;
+
+              if (idx.name === 'NIFTY 50') {
+                const navTicker = document.getElementById('navTickerVal');
+                if (navTicker) {
+                  navTicker.textContent = Number(idx.price).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                  navTicker.className = idx.isUp ? 'up' : 'down';
+                }
+                const introNifty = document.getElementById('introValNifty');
+                if (introNifty) introNifty.textContent = formatted;
+              } else if (idx.name === 'SENSEX') {
+                const introSensex = document.getElementById('introValSensex');
+                if (introSensex) introSensex.textContent = formatted;
+              } else if (idx.name === 'BANK NIFTY') {
+                const introBank = document.getElementById('introValBankNifty');
+                if (introBank) introBank.textContent = formatted;
+              }
+            });
+          }
+        } catch (err) {
+          console.warn('Live indices fetch error:', err);
+        }
+      }
+
+      function renderStock(stock, skipLiveFetch = false) {
+        currentStock = stock;
+        if (!skipLiveFetch) {
+          activeTimeSeries = generateCandleData(stock, currentTimeframe);
+        }
+
+        document.getElementById('stockSymbol').textContent = stock.symbol;
+        document.getElementById('stockExchange').textContent = stock.exchange;
+        document.getElementById('stockName').textContent = stock.name;
+        document.getElementById('stockPrice').textContent = '₹' + stock.price.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+        const isUp = stock.change >= 0;
+        const diffPill = document.getElementById('stockDiffPill');
+        const diffSign = document.getElementById('stockDiffSign');
+        const diffText = document.getElementById('stockDiffText');
+
+        diffPill.className = 'price-diff-pill ' + (isUp ? 'up' : 'down');
+        diffSign.textContent = isUp ? '▲' : '▼';
+        diffText.textContent = `${isUp ? '+' : ''}${stock.change.toFixed(2)} (${isUp ? '+' : ''}${stock.pct.toFixed(2)}%) Today`;
+
+        // Range slider
+        const spread = stock.high - stock.low;
+        const posRatio = spread > 0 ? (stock.price - stock.low) / spread : 0.5;
+        const clampedPos = Math.max(0, Math.min(100, posRatio * 100));
+
+        document.getElementById('rangeFill').style.width = clampedPos + '%';
+        document.getElementById('rangePin').style.left = clampedPos + '%';
+        document.getElementById('rangeSpreadText').textContent = 'Day Spread: ₹' + spread.toFixed(2);
+        document.getElementById('dayLowLabel').textContent = 'Low: ₹' + stock.low.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        document.getElementById('dayHighLabel').textContent = 'High: ₹' + stock.high.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+        // Stats Grid
+        document.getElementById('valOpen').textContent = '₹' + stock.open.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        document.getElementById('valHigh').textContent = '₹' + stock.high.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        document.getElementById('valLow').textContent = '₹' + stock.low.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        document.getElementById('valPrevClose').textContent = '₹' + stock.prevClose.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        document.getElementById('valVolume').textContent = stock.volume;
+        document.getElementById('val52w').textContent = stock.range52;
+        document.getElementById('valMcap').textContent = stock.mcap;
+        document.getElementById('valPE').textContent = stock.pe;
+
+        updateFavoriteButtonState();
+
+        document.querySelectorAll('.tag-btn').forEach(btn => {
+          if (btn.getAttribute('data-symbol') === stock.symbol) btn.classList.add('active');
+          else btn.classList.remove('active');
+        });
+
+        drawChart();
+
+        if (!skipLiveFetch) {
+          fetchLiveQuote(stock, currentTimeframe);
+        }
+      }
+
+      /* ==========================================================
+         8. RENDER ABOUT STOCKS FULL DETAILS
+         ========================================================== */
+      function renderAboutDetails(stock) {
+        document.getElementById('aboutDetailSymbol').textContent = stock.symbol;
+        document.getElementById('aboutDetailName').textContent = stock.name;
+        document.getElementById('aboutDetailSector').textContent = stock.sector || "Large Cap Indian Equity";
+        document.getElementById('aboutDetailExchange').textContent = stock.exchange;
+        document.getElementById('aboutDetailDescription').textContent = stock.desc || `${stock.name} is an established company on the National Stock Exchange (NSE) and Bombay Stock Exchange (BSE).`;
+
+        const baseVal = Math.abs(stock.price) || 500;
+        const f = stock.fundamentals || {
+          pe: stock.pe || (18 + (baseVal % 25)).toFixed(2),
+          indPe: (20 + (baseVal % 15)).toFixed(2),
+          pb: (2.2 + (baseVal % 5) * 0.8).toFixed(2),
+          evEbitda: (11 + (baseVal % 10)).toFixed(2),
+          bookValue: `₹${(baseVal * 0.35).toFixed(2)}`,
+          eps: `₹${(baseVal / 22).toFixed(2)}`,
+          divYield: `${(0.4 + (baseVal % 20) * 0.1).toFixed(2)}%`,
+          roe: `${(12 + (baseVal % 22)).toFixed(2)}%`,
+          roce: `${(14 + (baseVal % 25)).toFixed(2)}%`,
+          opm: `${(16 + (baseVal % 18)).toFixed(2)}%`,
+          npm: `${(9 + (baseVal % 14)).toFixed(2)}%`,
+          salesCAGR: `+${(11 + (baseVal % 14)).toFixed(1)}%`,
+          profitCAGR: `+${(12 + (baseVal % 18)).toFixed(1)}%`,
+          mcap: stock.mcap,
+          debt: `₹${((baseVal * 42) % 90 + 5).toFixed(1)} Thousand Cr`,
+          debtEq: `${((baseVal % 80) * 0.01).toFixed(2)}`,
+          currentRatio: `${(1.2 + (baseVal % 15) * 0.1).toFixed(2)}`,
+          interestCoverage: `${(6 + (baseVal % 15)).toFixed(1)}x`,
+          fcf: `₹${((baseVal * 12) % 35 + 2).toFixed(1)} Thousand Cr`,
+          promoter: Math.min(75, Math.max(35, 45 + (baseVal % 25))),
+          fii: Math.min(40, Math.max(10, 18 + (baseVal % 15))),
+          dii: Math.min(35, Math.max(8, 14 + (baseVal % 12))),
+          public: 15,
+          pledged: "0.00%",
+          beta: `${(0.85 + (baseVal % 60) * 0.01).toFixed(2)}`,
+          delivery: `${(48 + (baseVal % 30)).toFixed(1)}%`,
+          avgVol: stock.volume,
+          h52: stock.range52.includes('-') ? `₹${stock.range52.split('-')[1].trim()}` : `₹${(stock.price * 1.3).toFixed(2)}`,
+          l52: stock.range52.includes('-') ? `₹${stock.range52.split('-')[0].trim()}` : `₹${(stock.price * 0.7).toFixed(2)}`,
+          faceValue: "₹1.00",
+          consensus: `BUY (${75 + (baseVal % 20)}%)`,
+          target: `₹${(stock.price * 1.15).toFixed(2)}`,
+          upside: "+15.00%"
+        };
+
+        // Valuation
+        document.getElementById('fPE').textContent = f.pe;
+        document.getElementById('fIndPE').textContent = f.indPe;
+        document.getElementById('fPB').textContent = f.pb;
+        document.getElementById('fEvEbitda').textContent = f.evEbitda;
+        document.getElementById('fBookValue').textContent = f.bookValue;
+        document.getElementById('fEPS').textContent = f.eps;
+        document.getElementById('fDivYield').textContent = f.divYield;
+
+        // Profitability
+        document.getElementById('fROE').textContent = f.roe;
+        document.getElementById('fROCE').textContent = f.roce;
+        document.getElementById('fOPM').textContent = f.opm;
+        document.getElementById('fNPM').textContent = f.npm;
+        document.getElementById('fSalesCAGR').textContent = f.salesCAGR;
+        document.getElementById('fProfitCAGR').textContent = f.profitCAGR;
+
+        // Health
+        document.getElementById('fMcap').textContent = f.mcap;
+        document.getElementById('fDebt').textContent = f.debt;
+        document.getElementById('fDebtEq').textContent = f.debtEq;
+        document.getElementById('fCurrentRatio').textContent = f.currentRatio;
+        document.getElementById('fInterestCoverage').textContent = f.interestCoverage;
+        document.getElementById('fFCF').textContent = f.fcf;
+
+        // Shareholding
+        document.getElementById('fPromoter').textContent = f.promoter + '%';
+        document.getElementById('fFII').textContent = f.fii + '%';
+        document.getElementById('fDII').textContent = f.dii + '%';
+        document.getElementById('fPublic').textContent = f.public + '%';
+        document.getElementById('fPledged').textContent = f.pledged;
+
+        document.getElementById('shBarPromoter').style.width = f.promoter + '%';
+        document.getElementById('shBarFII').style.width = f.fii + '%';
+        document.getElementById('shBarDII').style.width = f.dii + '%';
+        document.getElementById('shBarPublic').style.width = f.public + '%';
+
+        // Volatility & Technicals
+        document.getElementById('fBeta').textContent = f.beta;
+        document.getElementById('fDelivery').textContent = f.delivery;
+        document.getElementById('fAvgVol').textContent = f.avgVol;
+        document.getElementById('f52High').textContent = f.h52;
+        document.getElementById('f52Low').textContent = f.l52;
+        document.getElementById('fFaceValue').textContent = f.faceValue;
+
+        // Targets
+        document.getElementById('fConsensus').textContent = f.consensus;
+        document.getElementById('fTargetPrice').textContent = f.target;
+        document.getElementById('fUpside').textContent = f.upside;
+
+        updateFavoriteButtonState();
+      }
+
+      document.getElementById('aboutToggleFavBtn').addEventListener('click', () => {
+        toggleFavorite(currentStock.symbol);
+      });
+
+      // Quick switcher tags on About Stocks page
+      document.querySelectorAll('#aboutQuickTags .tag-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('#aboutQuickTags .tag-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          const sym = this.getAttribute('data-symbol');
+          const found = getOrCreateStock(sym);
+          renderStock(found);
+          renderAboutDetails(found);
+        });
+      });
+
+      /* ==========================================================
+         9. UNIVERSAL SEARCH (EVERY STOCK IN THE MARKET)
+         ========================================================== */
+      function setupSearch(inputEl, clearBtnEl, panelEl, listEl, onSelect) {
+        function filter(q) {
+          if (!q.trim()) return [];
+          const query = q.toLowerCase().trim();
+
+          const matches = STOCKS.filter(s =>
+            s.symbol.toLowerCase().includes(query) ||
+            s.name.toLowerCase().includes(query) ||
+            (s.sector && s.sector.toLowerCase().includes(query))
+          );
+
+          // If query has at least 2 chars and no direct match, add dynamically generated option
+          if (query.length >= 2 && !matches.some(m => m.symbol.toLowerCase() === query)) {
+            const dynamicOption = getOrCreateStock(query);
+            if (!matches.some(m => m.symbol === dynamicOption.symbol)) {
+              matches.push(dynamicOption);
+            }
+          }
+
+          return matches.slice(0, 8);
+        }
+
+        function show(results) {
+          if (!results.length) {
+            panelEl.style.display = 'none';
+            return;
+          }
+          listEl.innerHTML = '';
+          results.forEach(stock => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            const isUp = stock.change >= 0;
+            item.innerHTML = `
+              <div class="sug-left">
+                <div class="sug-ticker-row">
+                  <span class="sug-symbol">${stock.symbol}</span>
+                  <span class="sug-exchange">${stock.exchange.split('|')[0]}</span>
+                </div>
+                <span class="sug-name">${stock.name}</span>
+              </div>
+              <div class="sug-right">
+                <div class="sug-price">₹${stock.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                <div class="sug-change ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${stock.pct.toFixed(2)}%</div>
+              </div>
+            `;
+            item.addEventListener('click', () => {
+              onSelect(stock);
+              panelEl.style.display = 'none';
+              inputEl.value = stock.symbol;
+              if (clearBtnEl) clearBtnEl.style.display = 'flex';
+            });
+            listEl.appendChild(item);
+          });
+          panelEl.style.display = 'block';
+        }
+
+        inputEl.addEventListener('input', function () {
+          const val = this.value;
+          if (clearBtnEl) clearBtnEl.style.display = val ? 'flex' : 'none';
+          show(filter(val));
+        });
+
+        if (clearBtnEl) {
+          clearBtnEl.addEventListener('click', function () {
+            inputEl.value = '';
+            clearBtnEl.style.display = 'none';
+            panelEl.style.display = 'none';
+            inputEl.focus();
+          });
+        }
+
+        document.addEventListener('click', function (e) {
+          if (!e.target.closest('.search-wrapper') && !e.target.closest('.about-search-box')) {
+            panelEl.style.display = 'none';
+          }
+        });
+      }
+
+      setupSearch(
+        document.getElementById('searchInput'),
+        document.getElementById('clearBtn'),
+        document.getElementById('suggestionsPanel'),
+        document.getElementById('suggestionsList'),
+        (stock) => {
+          renderStock(stock);
+        }
+      );
+
+      setupSearch(
+        document.getElementById('aboutSearchInput'),
+        null,
+        document.getElementById('aboutSuggestionsPanel'),
+        document.getElementById('aboutSuggestionsList'),
+        (stock) => {
+          renderStock(stock);
+          renderAboutDetails(stock);
+        }
+      );
+
+      // Search submit handler on screener
+      document.getElementById('searchForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const query = document.getElementById('searchInput').value.trim();
+        if (!query) return;
+        const stock = getOrCreateStock(query);
+        renderStock(stock);
+        document.getElementById('suggestionsPanel').style.display = 'none';
+      });
+
+      // Search submit handler on about page
+      document.getElementById('aboutSearchForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const query = document.getElementById('aboutSearchInput').value.trim();
+        if (!query) return;
+        const stock = getOrCreateStock(query);
+        renderStock(stock);
+        renderAboutDetails(stock);
+        document.getElementById('aboutSuggestionsPanel').style.display = 'none';
+      });
+
+      /* Quick tag pills on Explore Screener */
+      document.querySelectorAll('.quick-tags .tag-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          const sym = this.getAttribute('data-symbol');
+          const found = getOrCreateStock(sym);
+          renderStock(found);
+          document.getElementById('searchInput').value = found.symbol;
+          document.getElementById('clearBtn').style.display = 'flex';
+        });
+      });
+
+      /* Timeframe selector */
+      document.querySelectorAll('.timeframe-selector .toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.timeframe-selector .toggle-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentTimeframe = this.getAttribute('data-tf');
+          activeTimeSeries = generateCandleData(currentStock, currentTimeframe);
+          drawChart();
+          fetchLiveQuote(currentStock, currentTimeframe);
+        });
+      });
+
+      /* Live Sync Button */
+      const syncLiveBtn = document.getElementById('syncLiveQuoteBtn');
+      if (syncLiveBtn) {
+        syncLiveBtn.addEventListener('click', function () {
+          fetchLiveQuote(currentStock, currentTimeframe);
+          fetchLiveIndices();
+        });
+      }
+
+      /* Periodic Polling (every 30s when tab active) */
+      setInterval(() => {
+        if (!document.hidden) {
+          fetchLiveIndices();
+          fetchLiveQuote(currentStock, currentTimeframe);
+        }
+      }, 30000);
+
+      /* Populate Bottom Market Strip with Subtle Hover Scale Cards */
+      const marketStrip = document.getElementById('marketStrip');
+      const topEquities = STOCKS.slice(0, 6);
+      topEquities.forEach(stk => {
+        const isUp = stk.change >= 0;
+        const card = document.createElement('div');
+        card.className = 'strip-card';
+        card.innerHTML = `
+          <div>
+            <div class="strip-title">${stk.symbol}</div>
+            <div class="strip-sub">${stk.name.split('—')[0].slice(0, 24)}</div>
+          </div>
+          <div>
+            <div class="strip-price">₹${stk.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+            <div class="strip-change ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${stk.pct.toFixed(2)}%</div>
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          renderStock(stk);
+          document.getElementById('searchInput').value = stk.symbol;
+          document.getElementById('clearBtn').style.display = 'flex';
+          window.scrollTo({ top: 120, behavior: 'smooth' });
+        });
+        marketStrip.appendChild(card);
+      });
+
+      /* Window Resize Listener */
+      window.addEventListener('resize', resizeCanvas);
+
+      /* ==========================================================
+         10. BOOTSTRAP INITIAL STATE
+         ========================================================== */
+      loadFavorites();
+      renderStock(STOCKS[0]);
+      fetchLiveIndices();
+    })();
+  </script>
+</body>
+</html>

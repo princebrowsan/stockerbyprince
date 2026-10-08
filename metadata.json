@@ -1,0 +1,8 @@
+{
+  "name": "The Indian Stock Market",
+  "description": "Real-time search and intraday graphs for Indian stocks across NSE and BSE including NIFTY 50, SENSEX, and top equities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
